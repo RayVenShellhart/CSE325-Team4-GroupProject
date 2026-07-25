@@ -1,0 +1,34 @@
+## --------- .NET / Blazor Core ---------
+[Bb]in/
+[Oo]bj/
+[Log]/
+[Tt]mp/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## --------- Visual Studio & VS Code ---------
+.vs/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln.docstates
+
+## --------- Web Assets & Bundlers (If using Tailwind/SASS) ---------
+node_modules/
+.sass-cache/
+.eslintcache
+npm-debug.log*
+
+## --------- Publishing & Deployments ---------
+PublishOutput/
+[Pp]ublish/
+*.azurePubxml
+*.pubxml
+*.publishproj
+
+## --------- Secrets & Local Configurations ---------
+# Uncomment the line below if your local development appsettings contains real secrets
+# appsettings.Development.json
