@@ -1,0 +1,217 @@
+@page "/products"
+@using CSE325_Team4_GroupProject.Models
+
+<PageTitle>ShopHub - Products</PageTitle>
+
+<div class="products-page">
+    <h1>All Products</h1>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label>Category:</label>
+            <select @bind="selectedCategory">
+                <option value="">All</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Books">Books</option>
+                <option value="Food">Food</option>
+                <option value="Games">Games</option>
+                <option value="Sports">Sports</option>
+                <option value="Beauty">Beauty</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Sort by:</label>
+            <select @bind="sortBy">
+                <option value="name">Name</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="rating">Rating</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Search:</label>
+            <input type="text" @bind="searchTerm" placeholder="Search products..." />
+        </div>
+    </div>
+
+    <div class="product-grid">
+        @foreach (var product in filteredProducts)
+        {
+            <ProductCard Product="product" />
+        }
+    </div>
+</div>
+
+<style>
+    .products-page {
+        padding: 20px 0;
+    }
+
+    .filters {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-group label {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .filter-group select,
+    .filter-group input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .filter-group input {
+        min-width: 200px;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+</style>
+
+@code {
+    private List<Product> allProducts = new();
+    private string selectedCategory = "";
+    private string sortBy = "name";
+    private string searchTerm = "";
+
+    private List<Product> filteredProducts
+    {
+        get
+        {
+            var result = allProducts.AsEnumerable();
+
+            if (!string.IsNullOrEmpty(selectedCategory))
+            {
+                result = result.Where(p => p.Category == selectedCategory);
+            }
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                result = result.Where(p =>
+                    (p.Name != null && p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (p.Description != null && p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                );
+            }
+
+            result = sortBy switch
+            {
+                "price_low" => result.OrderBy(p => p.Price),
+                "price_high" => result.OrderByDescending(p => p.Price),
+                "rating" => result.OrderByDescending(p => p.Rating),
+                _ => result.OrderBy(p => p.Name)
+            };
+
+            return result.ToList();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        allProducts = new List<Product>
+        {
+            new Product { 
+                Id = 1, 
+                Name = "Classic T-Shirt", 
+                Price = 20.00M, 
+                Description = "Comfortable cotton t-shirt", 
+                ImageUrl = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop", 
+                Rating = 4.5, 
+                SellerName = "Fashion Store", 
+                Category = "Clothing" 
+            },
+            new Product { 
+                Id = 2, 
+                Name = "Wireless Headphones", 
+                Price = 45.00M, 
+                Description = "High quality sound", 
+                ImageUrl = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop", 
+                Rating = 4.8, 
+                SellerName = "Tech Store", 
+                Category = "Electronics" 
+            },
+            new Product { 
+                Id = 3, 
+                Name = "Wooden Chair", 
+                Price = 120.00M, 
+                Description = "Solid wood dining chair", 
+                ImageUrl = "https://images.unsplash.com/photo-1503602642458-232111445657?w=300&h=300&fit=crop", 
+                Rating = 4.2, 
+                SellerName = "Furniture Store", 
+                Category = "Furniture" 
+            },
+            new Product { 
+                Id = 4, 
+                Name = "Smartphone", 
+                Price = 300.00M, 
+                Description = "Latest model smartphone", 
+                ImageUrl = "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop", 
+                Rating = 4.9, 
+                SellerName = "Tech Store", 
+                Category = "Electronics" 
+            },
+            new Product { 
+                Id = 5, 
+                Name = "Running Shoes", 
+                Price = 80.00M, 
+                Description = "Comfortable running shoes", 
+                ImageUrl = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&h=300&fit=crop", 
+                Rating = 4.3, 
+                SellerName = "Sport Store", 
+                Category = "Sports" 
+            },
+            new Product { 
+                Id = 6, 
+                Name = "Coffee Table", 
+                Price = 150.00M, 
+                Description = "Modern coffee table", 
+                ImageUrl = "https://images.unsplash.com/photo-1499933374294-4584851497cc?w=300&h=300&fit=crop", 
+                Rating = 4.0, 
+                SellerName = "Furniture Store", 
+                Category = "Furniture" 
+            },
+            new Product { 
+                Id = 7, 
+                Name = "Leather Jacket", 
+                Price = 85.00M, 
+                Description = "Premium leather jacket", 
+                ImageUrl = "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300&h=300&fit=crop", 
+                Rating = 4.7, 
+                SellerName = "Fashion Store", 
+                Category = "Clothing" 
+            },
+            new Product { 
+                Id = 8, 
+                Name = "Gaming Mouse", 
+                Price = 35.00M, 
+                Description = "RGB gaming mouse", 
+                ImageUrl = "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=300&fit=crop", 
+                Rating = 4.4, 
+                SellerName = "Tech Store", 
+                Category = "Electronics" 
+            },
+        };
+    }
+}

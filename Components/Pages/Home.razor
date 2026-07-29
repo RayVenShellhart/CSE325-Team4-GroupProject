@@ -1,7 +1,411 @@
 ﻿@page "/"
+@using CSE325_Team4_GroupProject.Models
 
-<PageTitle>Home</PageTitle>
+<PageTitle>ShopHub - Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="home-page">
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <h1>Welcome to ShopHub</h1>
+        <p>Buy and sell items with ease</p>
+        <div class="hero-buttons">
+            <a href="/products" class="btn btn-primary">Browse Products</a>
+            <a href="/signup" class="btn btn-secondary">Start Selling</a>
+        </div>
+    </section>
 
-Welcome to your new app.
+    <!-- CATEGORIES -->
+    <section class="categories">
+        <h2>Shop by Category</h2>
+        <div class="category-grid">
+            <div class="category-card">👕 Clothing</div>
+            <div class="category-card">🍕 Food</div>
+            <div class="category-card">🪑 Furniture</div>
+            <div class="category-card">📱 Electronics</div>
+            <div class="category-card">📚 Books</div>
+            <div class="category-card">🎮 Games</div>
+            <div class="category-card">👟 Sports</div>
+            <div class="category-card">💄 Beauty</div>
+            <div class="category-card">🚗 Automotive</div>
+            <div class="category-card">🏠 Home & Garden</div>
+        </div>
+    </section>
+
+    <!-- FEATURED PRODUCTS -->
+    <section class="featured">
+        <h2>🔥 Featured Products</h2>
+        <div class="product-grid">
+            @foreach (var product in featuredProducts)
+            {
+                <ProductCard Product="product" />
+            }
+        </div>
+    </section>
+
+    <!-- DEALS OF THE DAY -->
+    <section class="deals">
+        <h2>⚡ Deals of the Day</h2>
+        <div class="deal-grid">
+            <div class="deal-card">
+                <span class="deal-badge">-20%</span>
+                <h3>Wireless Earbuds</h3>
+                <p class="old-price">₦25,000</p>
+                <p class="deal-price">₦20,000</p>
+                <button class="btn-deal">Shop Now</button>
+            </div>
+            <div class="deal-card">
+                <span class="deal-badge">-15%</span>
+                <h3>Smart Watch</h3>
+                <p class="old-price">₦50,000</p>
+                <p class="deal-price">₦42,500</p>
+                <button class="btn-deal">Shop Now</button>
+            </div>
+            <div class="deal-card">
+                <span class="deal-badge">-30%</span>
+                <h3>Running Shoes</h3>
+                <p class="old-price">₦35,000</p>
+                <p class="deal-price">₦24,500</p>
+                <button class="btn-deal">Shop Now</button>
+            </div>
+            <div class="deal-card">
+                <span class="deal-badge">-10%</span>
+                <h3>Laptop Bag</h3>
+                <p class="old-price">₦15,000</p>
+                <p class="deal-price">₦13,500</p>
+                <button class="btn-deal">Shop Now</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="testimonials">
+        <h2>💬 What Our Customers Say</h2>
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <p>"ShopHub made it so easy to find what I needed. Fast delivery and great prices!"</p>
+                <h4>- Sarah K.</h4>
+                <span>⭐⭐⭐⭐⭐</span>
+            </div>
+            <div class="testimonial-card">
+                <p>"I love selling my items on ShopHub. The platform is user-friendly and secure."</p>
+                <h4>- Michael O.</h4>
+                <span>⭐⭐⭐⭐⭐</span>
+            </div>
+            <div class="testimonial-card">
+                <p>"Best online shopping experience in Nigeria! Highly recommended."</p>
+                <h4>- Aisha B.</h4>
+                <span>⭐⭐⭐⭐⭐</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY SHOP WITH US -->
+    <section class="why-us">
+        <h2>❓ Why Shop With Us</h2>
+        <div class="why-grid">
+            <div class="why-card">
+                <div class="why-icon">🛡️</div>
+                <h3>Secure Payments</h3>
+                <p>Your transactions are safe and protected</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">🚚</div>
+                <h3>Fast Delivery</h3>
+                <p>Get your items delivered quickly</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">🔄</div>
+                <h3>Easy Returns</h3>
+                <p>Hassle-free return policy</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">📞</div>
+                <h3>24/7 Support</h3>
+                <p>We're here to help anytime</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .home-page {
+        padding: 10px 0;
+    }
+
+    .hero {
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        border-radius: 10px;
+        margin-bottom: 40px;
+    }
+
+    .hero h1 {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .hero p {
+        font-size: 20px;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.3s;
+    }
+
+    .btn-primary {
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+
+    .btn-primary:hover {
+        background: #f39c12;
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #2c3e50;
+    }
+
+    .btn-secondary:hover {
+        background: #ecf0f1;
+    }
+
+    .categories,
+    .featured,
+    .deals,
+    .testimonials,
+    .why-us {
+        margin-bottom: 50px;
+    }
+
+    .categories h2,
+    .featured h2,
+    .deals h2,
+    .testimonials h2,
+    .why-us h2 {
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .category-card {
+        background: #ecf0f1;
+        padding: 20px;
+        text-align: center;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+        font-size: 16px;
+    }
+
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .deal-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .deal-card {
+        background: #fef9e7;
+        border: 2px solid #f1c40f;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        position: relative;
+        transition: transform 0.3s;
+    }
+
+    .deal-card:hover {
+        transform: scale(1.03);
+    }
+
+    .deal-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: #e74c3c;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .deal-card h3 {
+        margin: 10px 0;
+        font-size: 18px;
+    }
+
+    .deal-card .old-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 14px;
+    }
+
+    .deal-card .deal-price {
+        color: #e74c3c;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .btn-deal {
+        background: #f1c40f;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s;
+        margin-top: 10px;
+    }
+
+    .btn-deal:hover {
+        background: #f39c12;
+    }
+
+    .testimonial-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    .testimonial-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #3498db;
+    }
+
+    .testimonial-card p {
+        font-style: italic;
+        font-size: 16px;
+        margin: 0 0 10px;
+    }
+
+    .testimonial-card h4 {
+        margin: 5px 0;
+        font-size: 16px;
+        color: #2c3e50;
+    }
+
+    .testimonial-card span {
+        color: #f1c40f;
+    }
+
+    .why-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .why-card {
+        text-align: center;
+        padding: 20px;
+        background: white;
+        border: 1px solid #ecf0f1;
+        border-radius: 10px;
+        transition: box-shadow 0.3s;
+    }
+
+    .why-card:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .why-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    .why-card h3 {
+        font-size: 18px;
+        margin: 10px 0 5px;
+        color: #2c3e50;
+    }
+
+    .why-card p {
+        color: #7f8c8d;
+        font-size: 14px;
+        margin: 0;
+    }
+</style>
+
+@code {
+    private List<Product> featuredProducts = new();
+
+    protected override void OnInitialized()
+    {
+        featuredProducts = new List<Product>
+        {
+            new Product { 
+                Id = 1, 
+                Name = "Classic T-Shirt", 
+                Price = 20.00M, 
+                Description = "Comfortable cotton t-shirt", 
+                ImageUrl = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop", 
+                Rating = 4.5, 
+                SellerName = "Fashion Store" 
+            },
+            new Product { 
+                Id = 2, 
+                Name = "Wireless Headphones", 
+                Price = 45.00M, 
+                Description = "High quality sound", 
+                ImageUrl = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop", 
+                Rating = 4.8, 
+                SellerName = "Tech Store" 
+            },
+            new Product { 
+                Id = 3, 
+                Name = "Wooden Chair", 
+                Price = 120.00M, 
+                Description = "Solid wood dining chair", 
+                ImageUrl = "https://images.unsplash.com/photo-1503602642458-232111445657?w=300&h=300&fit=crop", 
+                Rating = 4.2, 
+                SellerName = "Furniture Store" 
+            },
+            new Product { 
+                Id = 4, 
+                Name = "Smartphone", 
+                Price = 300.00M, 
+                Description = "Latest model smartphone", 
+                ImageUrl = "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop", 
+                Rating = 4.9, 
+                SellerName = "Tech Store" 
+            },
+        };
+    }
+}
