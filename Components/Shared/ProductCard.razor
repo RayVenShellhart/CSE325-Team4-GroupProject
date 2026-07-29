@@ -1,0 +1,102 @@
+@using CSE325_Team4_GroupProject.Models
+
+<div class="product-card" @onclick="() => NavigateToProduct(Product.Id)">
+    <img src="@Product.ImageUrl" alt="@Product.Name" />
+    <div class="product-info">
+        <h3>@Product.Name</h3>
+        <p class="description">@Product.Description</p>
+        <span class="price">₦@Product.Price</span>
+        <div class="rating">⭐ @Product.Rating</div>
+        <button class="add-to-cart" @onclick="() => AddToCart(Product)">
+            Add to Cart
+        </button>
+    </div>
+</div>
+
+<style>
+    .product-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .product-info {
+        padding: 15px;
+    }
+
+    .product-card h3 {
+        margin: 0 0 5px;
+        font-size: 18px;
+    }
+
+    .product-card .description {
+        color: #7f8c8d;
+        font-size: 14px;
+        margin: 5px 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .product-card .price {
+        color: #e74c3c;
+        font-size: 20px;
+        font-weight: bold;
+        display: block;
+    }
+
+    .product-card .rating {
+        color: #f1c40f;
+        font-size: 14px;
+        margin: 5px 0;
+    }
+
+    .product-card .add-to-cart {
+        background: #2c3e50;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 10px;
+        transition: background 0.3s;
+    }
+
+    .product-card .add-to-cart:hover {
+        background: #1a252f;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public Product Product { get; set; } = new();
+
+    [Inject]
+    private NavigationManager? Navigation { get; set; }
+
+    private void NavigateToProduct(int productId)
+    {
+        Navigation?.NavigateTo($"/product/{productId}");
+    }
+
+    private void AddToCart(Product product)
+    {
+        Console.WriteLine($"Added {product.Name} to cart");
+    }
+}
