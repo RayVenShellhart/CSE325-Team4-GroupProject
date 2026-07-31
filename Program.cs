@@ -2,6 +2,7 @@ using CSE325_Team4_GroupProject.Components;
 using CSE325_Team4_GroupProject.Data;
 using CSE325_Team4_GroupProject.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddDbContext<ShopDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 

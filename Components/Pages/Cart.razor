@@ -168,29 +168,30 @@
 </style>
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        CartService.Changed += StateHasChanged;
+        CartService.Changed += OnCartChanged;
+        await CartService.LoadCartAsync();
+    }
+
+    private async void OnCartChanged()
+    {
+        await InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        CartService.Changed -= StateHasChanged;
+        CartService.Changed -= OnCartChanged;
     }
 
-    private void OnCartChanged()
+    private async Task UpdateQuantity(int productId, int quantity)
     {
-        InvokeAsync(StateHasChanged);
+        await CartService.UpdateQuantity(productId, quantity);
     }
 
-    private void UpdateQuantity(int productId, int quantity)
+    private async Task RemoveItem(int productId)
     {
-        CartService.UpdateQuantity(productId, quantity);
-    }
-
-    private void RemoveItem(int productId)
-    {
-        CartService.Remove(productId);
+        await CartService.Remove(productId);
     }
 
     private void GoToCheckout()
