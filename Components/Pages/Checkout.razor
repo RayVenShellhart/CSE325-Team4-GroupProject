@@ -1,0 +1,76 @@
+@page "/checkout"
+@inject CSE325_Team4_GroupProject.Services.CartService Cart
+@inject NavigationManager Navigation
+
+<PageTitle>ShopHub - Checkout</PageTitle>
+
+<div class="checkout-page">
+    <h1>Checkout</h1>
+
+    @if (!Cart.Items.Any())
+    {
+        <div class="empty-cart">
+            <p>Your cart is empty. Add items before checking out.</p>
+            <a class="btn btn-primary" href="/products">Browse products</a>
+        </div>
+    }
+    else
+    {
+        <div class="checkout-layout">
+            <div class="checkout-form">
+                <h2>Shipping Information</h2>
+                <label>Name</label>
+                <input placeholder="Full name" />
+
+                <label>Address</label>
+                <input placeholder="Street address" />
+
+                <label>City</label>
+                <input placeholder="City" />
+
+                <label>Phone</label>
+                <input placeholder="Phone number" />
+
+                <button class="btn btn-primary place-order-btn" @onclick="PlaceOrder">Place Order</button>
+            </div>
+
+            <div class="summary-card">
+                <h2>Order Summary</h2>
+                @foreach (var item in Cart.Items)
+                {
+                    <div class="summary-item">
+                        <span>@item.Name x @item.Quantity</span>
+                        <span>₦@((item.Price * item.Quantity).ToString("0.00"))</span>
+                    </div>
+                }
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>₦@Cart.TotalPrice.ToString("0.00")</span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .checkout-page { padding: 20px 0; }
+    .checkout-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .checkout-form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .checkout-form input { display: block; width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 5px; }
+    .place-order-btn { width: 100%; padding: 12px; margin-top: 10px; }
+    .summary-card { background: #f8f9fa; padding: 20px; border-radius: 8px; height: fit-content; }
+    .summary-item, .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .summary-row.total { font-weight: bold; font-size: 18px; }
+    .empty-cart { text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; }
+    .btn { padding: 10px 18px; text-decoration: none; display: inline-block; }
+    .btn-primary { background: #f1c40f; color: #2c3e50; border: none; border-radius: 5px; cursor: pointer; }
+    @@media (max-width: 900px) { .checkout-layout { grid-template-columns: 1fr; } }
+</style>
+
+@code {
+    private void PlaceOrder()
+    {
+        Cart.Clear();
+        Navigation.NavigateTo("/");
+    }
+}

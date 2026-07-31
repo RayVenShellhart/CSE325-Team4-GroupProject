@@ -1,4 +1,5 @@
 @using CSE325_Team4_GroupProject.Models
+@inject CSE325_Team4_GroupProject.Services.CartService Cart
 
 <div class="product-card" @onclick="() => NavigateToProduct(Product.Id)">
     <img src="@Product.ImageUrl" alt="@Product.Name" />
@@ -7,9 +8,13 @@
         <p class="description">@Product.Description</p>
         <span class="price">₦@Product.Price</span>
         <div class="rating">⭐ @Product.Rating</div>
-        <button class="add-to-cart" @onclick="() => AddToCart(Product)">
-            Add to Cart
+        <button class="add-to-cart" @onclick="AddToCart" @onclick:stopPropagation="true">
+            @buttonText
         </button>
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <p class="cart-status">@statusMessage</p>
+        }
     </div>
 </div>
 
@@ -81,6 +86,12 @@
     .product-card .add-to-cart:hover {
         background: #1a252f;
     }
+
+    .cart-status {
+        margin: 8px 0 0;
+        color: #27ae60;
+        font-size: 13px;
+    }
 </style>
 
 @code {
@@ -90,13 +101,18 @@
     [Inject]
     private NavigationManager? Navigation { get; set; }
 
+    private string buttonText = "Add to Cart";
+    private string? statusMessage;
+
     private void NavigateToProduct(int productId)
     {
         Navigation?.NavigateTo($"/product/{productId}");
     }
 
-    private void AddToCart(Product product)
+    private void AddToCart()
     {
-        Console.WriteLine($"Added {product.Name} to cart");
+        Cart.Add(Product);
+        buttonText = "Added";
+        statusMessage = $"{Product.Name} added to cart";
     }
 }

@@ -1,10 +1,18 @@
 using CSE325_Team4_GroupProject.Components;
+using CSE325_Team4_GroupProject.Data;
+using CSE325_Team4_GroupProject.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<CSE325_Team4_GroupProject.Services.CartService>();
+builder.Services.AddScoped<CSE325_Team4_GroupProject.Services.ProductService>();
+builder.Services.AddDbContext<ShopDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

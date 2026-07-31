@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using CSE325_Team4_GroupProject.Models
+@inject CSE325_Team4_GroupProject.Services.ProductService ProductService
 
 <PageTitle>ShopHub - Home</PageTitle>
 
@@ -366,46 +367,9 @@
 @code {
     private List<Product> featuredProducts = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        featuredProducts = new List<Product>
-        {
-            new Product { 
-                Id = 1, 
-                Name = "Classic T-Shirt", 
-                Price = 20.00M, 
-                Description = "Comfortable cotton t-shirt", 
-                ImageUrl = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop", 
-                Rating = 4.5, 
-                SellerName = "Fashion Store" 
-            },
-            new Product { 
-                Id = 2, 
-                Name = "Wireless Headphones", 
-                Price = 45.00M, 
-                Description = "High quality sound", 
-                ImageUrl = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop", 
-                Rating = 4.8, 
-                SellerName = "Tech Store" 
-            },
-            new Product { 
-                Id = 3, 
-                Name = "Wooden Chair", 
-                Price = 120.00M, 
-                Description = "Solid wood dining chair", 
-                ImageUrl = "https://images.unsplash.com/photo-1503602642458-232111445657?w=300&h=300&fit=crop", 
-                Rating = 4.2, 
-                SellerName = "Furniture Store" 
-            },
-            new Product { 
-                Id = 4, 
-                Name = "Smartphone", 
-                Price = 300.00M, 
-                Description = "Latest model smartphone", 
-                ImageUrl = "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop", 
-                Rating = 4.9, 
-                SellerName = "Tech Store" 
-            },
-        };
+        await ProductService.SeedProductsAsync();
+        featuredProducts = await ProductService.GetFeaturedProductsAsync();
     }
 }
