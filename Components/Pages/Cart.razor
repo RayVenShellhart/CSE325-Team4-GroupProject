@@ -170,17 +170,17 @@
 @code {
     protected override void OnInitialized()
     {
-        CartService.Changed += OnCartChanged;
+        CartService.Changed += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CartService.Changed -= StateHasChanged;
     }
 
     private void OnCartChanged()
     {
         InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        CartService.Changed -= OnCartChanged;
     }
 
     private void UpdateQuantity(int productId, int quantity)

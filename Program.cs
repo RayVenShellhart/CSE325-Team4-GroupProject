@@ -9,8 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddScoped<CartService>();
-builder.Services.AddScoped<CSE325_Team4_GroupProject.Services.CartService>();
-builder.Services.AddScoped<CSE325_Team4_GroupProject.Services.ProductService>();
+builder.Services.AddScoped<ProductService>();
 builder.Services.AddDbContext<ShopDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
