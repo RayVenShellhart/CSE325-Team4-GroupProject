@@ -61,7 +61,8 @@
 </div>
 
 <style>
-    html, body {
+    html,
+    body {
         margin: 0;
         padding: 0;
         height: 100%;
@@ -213,18 +214,21 @@
 </style>
 
 @code {
-    protected override void OnInitialized()
+
+    protected override async Task OnInitializedAsync()
     {
-        CartService.Changed += RefreshCart;
+        CartService.Changed += OnCartChanged;
+
+        await CartService.LoadCartAsync();
     }
 
-    private void RefreshCart()
+    private async void OnCartChanged()
     {
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        CartService.Changed -= RefreshCart;
+        CartService.Changed -= OnCartChanged;
     }
 }
