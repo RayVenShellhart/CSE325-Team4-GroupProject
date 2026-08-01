@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@inject CSE325_Team4_GroupProject.Services.CartService CartService
+@implements IDisposable
 
 <div class="page-container">
     <!-- HEADER -->
@@ -12,7 +14,7 @@
                 </div>
                 <div class="nav-links">
                     <a href="/products">Products</a>
-                    <a href="/cart">🛒 Cart</a>
+                    <a href="/cart">🛒 Cart <span class="cart-count">@CartService.ItemCount</span></a>
                     <a href="/login">Login</a>
                     <a href="/signup">Sign Up</a>
                 </div>
@@ -59,7 +61,8 @@
 </div>
 
 <style>
-    html, body {
+    html,
+    body {
         margin: 0;
         padding: 0;
         height: 100%;
@@ -141,6 +144,16 @@
         color: #f1c40f;
     }
 
+    .cart-count {
+        background: #f1c40f;
+        color: #2c3e50;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        margin-left: 6px;
+        font-weight: bold;
+    }
+
     .main-content {
         flex: 1;
         padding: 30px 0;
@@ -199,3 +212,23 @@
         font-size: 14px;
     }
 </style>
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartService.Changed += OnCartChanged;
+
+        await CartService.LoadCartAsync();
+    }
+
+    private async void OnCartChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        CartService.Changed -= OnCartChanged;
+    }
+}

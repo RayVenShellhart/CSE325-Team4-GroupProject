@@ -1,0 +1,201 @@
+@page "/cart"
+@inject CSE325_Team4_GroupProject.Services.CartService CartService
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<PageTitle>ShopHub - Cart</PageTitle>
+
+<div class="cart-page">
+    <h1>Your Cart</h1>
+
+    @if (!CartService.Items.Any())
+    {
+        <div class="empty-cart">
+            <p>Your cart is empty.</p>
+            <a class="btn btn-primary" href="/products">Continue shopping</a>
+        </div>
+    }
+    else
+    {
+        <div class="cart-layout">
+            <div class="cart-items">
+                @foreach (var item in CartService.Items)
+                {
+                    <div class="cart-item">
+                        @if (!string.IsNullOrWhiteSpace(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" alt="@item.Name" />
+                        }
+                        <div class="item-details">
+                            <h3>@item.Name</h3>
+                            <p>₦@item.Price.ToString("0.00")</p>
+                            <div class="quantity-controls">
+                                <button @onclick="() => UpdateQuantity(item.ProductId, item.Quantity - 1)">-</button>
+                                <span>@item.Quantity</span>
+                                <button @onclick="() => UpdateQuantity(item.ProductId, item.Quantity + 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="item-actions">
+                            <p class="item-total">₦@((item.Price * item.Quantity).ToString("0.00"))</p>
+                            <button class="remove-btn" @onclick="() => RemoveItem(item.ProductId)">Remove</button>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="summary-card">
+                <h2>Order Summary</h2>
+                <div class="summary-row">
+                    <span>Items</span>
+                    <span>@CartService.ItemCount</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total</span>
+                    <span>₦@CartService.TotalPrice.ToString("0.00")</span>
+                </div>
+                <button class="btn btn-primary checkout-btn" @onclick="GoToCheckout">Proceed to Checkout</button>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .cart-page {
+        padding: 20px 0;
+    }
+
+    .cart-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+    }
+
+    .cart-item {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        background: white;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .cart-item img {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .item-details {
+        flex: 1;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .quantity-controls button,
+    .remove-btn,
+    .checkout-btn {
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .quantity-controls button {
+        width: 28px;
+        height: 28px;
+    }
+
+    .remove-btn {
+        background: #e74c3c;
+        color: white;
+        padding: 8px 12px;
+    }
+
+    .summary-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        height: fit-content;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .summary-row.total {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .checkout-btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 16px;
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 40px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+
+    @@media (max-width: 900px) {
+        .cart-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        CartService.Changed += OnCartChanged;
+        await CartService.LoadCartAsync();
+    }
+
+    private async void OnCartChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        CartService.Changed -= OnCartChanged;
+    }
+
+    private async Task UpdateQuantity(int productId, int quantity)
+    {
+        await CartService.UpdateQuantity(productId, quantity);
+    }
+
+    private async Task RemoveItem(int productId)
+    {
+        await CartService.Remove(productId);
+    }
+
+    private void GoToCheckout()
+    {
+        Navigation.NavigateTo("/checkout");
+    }
+}
