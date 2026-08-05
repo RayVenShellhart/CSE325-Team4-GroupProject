@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject CSE325_Team4_GroupProject.Services.CartService CartService
+@inject CSE325_Team4_GroupProject.Services.AuthStateService AuthStateService
 @implements IDisposable
 
 <div class="page-container">
@@ -15,8 +16,18 @@
                 <div class="nav-links">
                     <a href="/products">Products</a>
                     <a href="/cart">🛒 Cart <span class="cart-count">@CartService.ItemCount</span></a>
-                    <a href="/login">Login</a>
-                    <a href="/signup">Sign Up</a>
+
+                    @if (AuthStateService.CurrentUser != null)
+                    {
+                        <span class="user-greeting">👋 @AuthStateService.CurrentUser.FirstName</span>
+                        <a href="/profile">Profile</a>
+                        <a href="#" @onclick="Logout" @onclick:preventDefault="true">Logout</a>
+                    }
+                    else
+                    {
+                        <a href="/login">Login</a>
+                        <a href="/signup">Sign Up</a>
+                    }
                 </div>
             </div>
         </div>
@@ -144,6 +155,12 @@
         color: #f1c40f;
     }
 
+    .user-greeting {
+        color: #f1c40f;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
     .cart-count {
         background: #f1c40f;
         color: #2c3e50;
@@ -214,12 +231,10 @@
 </style>
 
 @code {
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         CartService.Changed += OnCartChanged;
-
-        await CartService.LoadCartAsync();
+        AuthStateService.OnChange += OnAuthStateChanged;
     }
 
     private async void OnCartChanged()
@@ -227,8 +242,23 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private async void OnAuthStateChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task Logout()
+    {
+        AuthStateService.Logout();
+        NavigationManager?.NavigateTo("/", true);
+    }
+
     public void Dispose()
     {
         CartService.Changed -= OnCartChanged;
+        AuthStateService.OnChange -= OnAuthStateChanged;
     }
+
+    [Inject]
+    private NavigationManager? NavigationManager { get; set; }
 }
