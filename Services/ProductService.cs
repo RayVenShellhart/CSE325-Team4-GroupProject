@@ -13,6 +13,14 @@ public class ProductService
         _context = context;
     }
 
+    public async Task<Product?> GetProductByIdAsync(
+    int id,
+    CancellationToken cancellationToken = default)
+    {
+        return await _context.Products
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+    }
+
     public async Task<List<Product>> GetAllProductsAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Products

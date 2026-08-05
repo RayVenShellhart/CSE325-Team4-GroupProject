@@ -1,0 +1,73 @@
+@page "/product/{Id:int}"
+
+@using CSE325_Team4_GroupProject.Models
+@inject CSE325_Team4_GroupProject.Services.ProductService ProductService
+
+<PageTitle>ShopHub - Product</PageTitle>
+
+@if (product == null) {
+    <p>Does not Exist</p>
+}
+else {
+    <div class="product-page">
+        
+        <img src="@product.ImageUrl" alt="@product.Name" class="product-image">
+        <div class="product-info">
+            <h1>@product.Name</h1>
+            <p>Price: ₦@product.Price</p>
+            <p>Rating: @product.Rating ⭐</p>
+            <p>Category: @product.Category</p>
+            <p>Seller: @product.SellerName</p>
+            <p>@product.Description</p>
+
+            <button>Add to Cart</button>
+        </div>
+    </div>
+}
+
+
+
+<style>
+    .product-page {
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+        padding: 30px;
+    }
+
+    .product-image img {
+        width: 400px;
+        border-radius: 10px;
+    }
+
+    .product-info {
+        flex: 1;
+    }
+
+    .product-info h1 {
+        margin-top: 0;
+    }
+
+    .product-info p {
+        margin: 12px 0;
+    }
+
+    .product-info button {
+        margin-top: 25px;
+        padding: 12px 24px;
+        cursor: pointer;
+    }
+</style>
+
+
+@code {
+    [Parameter]
+
+    public int Id { get; set; }
+
+    private Product? product;
+
+    protected override async Task OnParametersSetAsync() {
+        product = await ProductService.GetProductByIdAsync(Id);
+    }
+}
