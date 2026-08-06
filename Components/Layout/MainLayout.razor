@@ -20,6 +20,10 @@
                     @if (AuthStateService.CurrentUser != null)
                     {
                         <span class="user-greeting">👋 @AuthStateService.CurrentUser.FirstName</span>
+                        @if (IsSellerOrAdmin)
+                        {
+                            <a href="/seller/products">My Products</a>
+                        }
                         <a href="/profile">Profile</a>
                         <a href="#" @onclick="Logout" @onclick:preventDefault="true">Logout</a>
                     }
@@ -231,6 +235,10 @@
 </style>
 
 @code {
+    private bool IsSellerOrAdmin =>
+        AuthStateService.CurrentUser != null &&
+        (AuthStateService.CurrentUser.UserType is "Seller" or "Both" or "Admin");
+
     protected override void OnInitialized()
     {
         CartService.Changed += OnCartChanged;
