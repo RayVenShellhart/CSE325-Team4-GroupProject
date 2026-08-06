@@ -19,6 +19,7 @@ builder.Services.AddSingleton<AuthStateService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<ReviewService>();
 
 var app = builder.Build();
 
