@@ -1,0 +1,252 @@
+@page "/become-seller"
+@inject CSE325_Team4_GroupProject.Services.AuthStateService AuthStateService
+
+<PageTitle>ShopHub - Become a Seller</PageTitle>
+
+<div class="seller-page">
+    <!-- HERO -->
+    <section class="seller-hero">
+        <h1>📦 Start Selling on ShopHub</h1>
+        <p>Turn your items into income. Reach thousands of buyers across the country.</p>
+        @if (AuthStateService.CurrentUser != null)
+        {
+            <a class="btn btn-primary" href="/seller">Go to Seller Dashboard →</a>
+        }
+        else
+        {
+            <a class="btn btn-primary" href="/signup?type=seller">Create Seller Account</a>
+            <a class="btn btn-secondary" href="/login">I already have an account</a>
+        }
+    </section>
+
+    <!-- BENEFITS -->
+    <section class="benefits">
+        <h2>Why sell on ShopHub?</h2>
+        <div class="benefit-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon">💰</div>
+                <h3>Zero Listing Fees</h3>
+                <p>List unlimited products for free and only pay when you make a sale.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">📈</div>
+                <h3>Reach More Buyers</h3>
+                <p>Your products are shown across categories and search results.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">🛡️</div>
+                <h3>Secure Payments</h3>
+                <p>Get paid safely through our trusted payment system.</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">⚡</div>
+                <h3>Easy Management</h3>
+                <p>Add, edit and remove products anytime from your seller dashboard.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-it-works">
+        <h2>How it works</h2>
+        <div class="steps">
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Create an account</h3>
+                <p>Sign up for free and choose to buy, sell, or both.</p>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Add your products</h3>
+                <p>Upload product photos, prices and descriptions in minutes.</p>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Get discovered</h3>
+                <p>Buyers find your items by category, search, or your seller name.</p>
+            </div>
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Grow your sales</h3>
+                <p>Manage everything from your dashboard and scale up.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="seller-cta">
+        <h2>Ready to start your store?</h2>
+        @if (AuthStateService.CurrentUser != null)
+        {
+            <a class="btn btn-primary" href="/seller">Open My Seller Dashboard</a>
+        }
+        else
+        {
+            <a class="btn btn-primary" href="/signup?type=seller">Join ShopHub as a Seller</a>
+        }
+    </section>
+</div>
+
+<style>
+    .seller-page {
+        padding: 20px 0;
+    }
+
+    .seller-hero {
+        text-align: center;
+        padding: 60px 30px;
+        background: linear-gradient(135deg, #3498db, #2c3e50);
+        color: white;
+        border-radius: 12px;
+        margin-bottom: 45px;
+    }
+
+    .seller-hero h1 {
+        font-size: 42px;
+        margin: 0 0 12px;
+    }
+
+    .seller-hero p {
+        font-size: 18px;
+        opacity: 0.9;
+        margin: 0 0 25px;
+    }
+
+    .btn {
+        padding: 13px 30px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin: 5px;
+    }
+
+    .btn-primary {
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+
+    .btn-primary:hover {
+        background: #f39c12;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #2c3e50;
+    }
+
+    .btn-secondary:hover {
+        background: #ecf0f1;
+        transform: translateY(-2px);
+    }
+
+    .benefits,
+    .how-it-works,
+    .seller-cta {
+        margin-bottom: 45px;
+    }
+
+    .benefits h2,
+    .how-it-works h2 {
+        font-size: 28px;
+        color: #2c3e50;
+        margin-bottom: 25px;
+        text-align: center;
+    }
+
+    .benefit-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .benefit-card {
+        background: white;
+        border: 1px solid #ecf0f1;
+        border-radius: 10px;
+        padding: 25px;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .benefit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .benefit-icon {
+        font-size: 42px;
+        margin-bottom: 12px;
+    }
+
+    .benefit-card h3 {
+        color: #2c3e50;
+        margin: 0 0 8px;
+        font-size: 18px;
+    }
+
+    .benefit-card p {
+        color: #7f8c8d;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .step {
+        text-align: center;
+        padding: 25px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        position: relative;
+    }
+
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: #f1c40f;
+        color: #2c3e50;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .step h3 {
+        color: #2c3e50;
+        margin: 0 0 8px;
+        font-size: 17px;
+    }
+
+    .step p {
+        color: #7f8c8d;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .seller-cta {
+        text-align: center;
+        padding: 45px 20px;
+        background: #fef9e7;
+        border: 2px solid #f1c40f;
+        border-radius: 12px;
+    }
+
+    .seller-cta h2 {
+        color: #2c3e50;
+        font-size: 26px;
+        margin: 0 0 20px;
+    }
+</style>

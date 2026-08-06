@@ -1,0 +1,588 @@
+@page "/seller"
+@using CSE325_Team4_GroupProject.Models
+@using CSE325_Team4_GroupProject.Services
+@inject ProductService ProductService
+@inject AuthStateService AuthStateService
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>ShopHub - Seller Dashboard</PageTitle>
+
+@if (AuthStateService.CurrentUser == null)
+{
+    <div class="login-required">
+        <h1>🔒 Login required</h1>
+        <p>Please login or create an account to start selling on ShopHub.</p>
+        <a class="btn btn-primary" href="/login">Login</a>
+        <a class="btn btn-secondary" href="/signup?type=seller">Create Seller Account</a>
+    </div>
+}
+else
+{
+    <div class="seller-dashboard">
+        <div class="dash-header">
+            <div>
+                <h1>Seller Dashboard</h1>
+                <p>Selling as <b>@SellerName</b> · @myProducts.Count product@(myProducts.Count == 1 ? "" : "s") listed</p>
+            </div>
+            <button class="btn btn-secondary" @onclick="StartNewProduct">＋ Add New Product</button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success">@successMessage</div>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <!-- ADD / EDIT PRODUCT FORM -->
+        @if (showForm)
+        {
+            <div class="product-form">
+                <h2>@(editingProductId == 0 ? "Add New Product" : "Edit Product")</h2>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>Product Name *</label>
+                        <input type="text" class="form-control" placeholder="e.g. Wireless Earbuds" @bind="form.Name" />
+                    </div>
+                    <div class="form-group half">
+                        <label>Price (₦) *</label>
+                        <input type="number" step="0.01" min="0" class="form-control" placeholder="e.g. 25000" @bind="form.Price" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half">
+                        <label>Category *</label>
+                        <select class="form-control" @bind="form.Category">
+                            @foreach (var category in allCategories)
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group half">
+                        <label>Rating (1 - 5)</label>
+                        <input type="number" step="0.1" min="1" max="5" class="form-control" @bind="form.Rating" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="3" placeholder="Describe your product..." @bind="form.Description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" class="form-control" placeholder="https://example.com/image.jpg" @bind="form.ImageUrl" />
+                    @if (!string.IsNullOrWhiteSpace(form.ImageUrl))
+                    {
+                        <img class="image-preview" src="@form.ImageUrl" alt="Preview" />
+                    }
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" @onclick="SaveProduct">@(editingProductId == 0 ? "➕ Add Product" : "💾 Save Changes")</button>
+                    <button class="btn btn-cancel" @onclick="CancelForm">Cancel</button>
+                </div>
+            </div>
+        }
+
+        <!-- MY PRODUCTS -->
+        <h2 class="section-title">My Products</h2>
+
+        @if (!myProducts.Any())
+        {
+            <div class="empty-products">
+                <p>📭 You haven't listed any products yet.</p>
+                <button class="btn btn-primary" @onclick="StartNewProduct">Add your first product</button>
+            </div>
+        }
+        else
+        {
+            <div class="my-products">
+                @foreach (var product in myProducts)
+                {
+                    <div class="my-product">
+                        <img src="@product.ImageUrl" alt="@product.Name" />
+                        <div class="my-product-info">
+                            <h3>@product.Name</h3>
+                            <p class="my-product-category">@product.Category · ⭐ @product.Rating</p>
+                            <p class="my-product-price">₦@product.Price.ToString("0.00")</p>
+                        </div>
+                        <div class="my-product-actions">
+                            <a class="btn-view" href="/product/@product.Id" target="_blank">View</a>
+                            <button class="btn-edit" @onclick="() => EditProduct(product)">✏️ Edit</button>
+                            <button class="btn-delete" @onclick="() => DeleteProduct(product)">🗑️ Delete</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .seller-dashboard {
+        padding: 20px 0;
+    }
+
+    .dash-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .dash-header h1 {
+        margin: 0 0 5px;
+        color: #2c3e50;
+    }
+
+    .dash-header p {
+        margin: 0;
+        color: #7f8c8d;
+    }
+
+    .alert {
+        padding: 12px 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .product-form {
+        background: white;
+        border: 1px solid #ecf0f1;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 35px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .product-form h2 {
+        color: #2c3e50;
+        margin: 0 0 20px;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+        flex: 1;
+    }
+
+    .form-group.half {
+        flex: 1;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .image-preview {
+        margin-top: 10px;
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .btn {
+        padding: 12px 26px;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-primary {
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+
+    .btn-primary:hover {
+        background: #f39c12;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #2c3e50;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #1a252f;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+        background: #ecf0f1;
+        color: #555;
+    }
+
+    .btn-cancel:hover {
+        background: #dfe6e9;
+    }
+
+    .section-title {
+        color: #2c3e50;
+        font-size: 22px;
+        margin: 10px 0 15px;
+    }
+
+    .empty-products,
+    .login-required {
+        text-align: center;
+        padding: 50px 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .empty-products p,
+    .login-required p {
+        color: #555;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .my-products {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .my-product {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: white;
+        border: 1px solid #ecf0f1;
+        border-radius: 10px;
+        padding: 14px;
+        transition: box-shadow 0.3s;
+    }
+
+    .my-product:hover {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .my-product img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .my-product-info {
+        flex: 1;
+    }
+
+    .my-product-info h3 {
+        margin: 0 0 4px;
+        font-size: 17px;
+        color: #2c3e50;
+    }
+
+    .my-product-category {
+        margin: 0 0 4px;
+        font-size: 13px;
+        color: #7f8c8d;
+    }
+
+    .my-product-price {
+        margin: 0;
+        font-weight: bold;
+        color: #e74c3c;
+        font-size: 16px;
+    }
+
+    .my-product-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .my-product-actions button,
+    .my-product-actions a {
+        border: none;
+        border-radius: 5px;
+        padding: 8px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .btn-view {
+        background: #ecf0f1;
+        color: #2c3e50;
+    }
+
+    .btn-view:hover {
+        background: #dfe6e9;
+    }
+
+    .btn-edit {
+        background: #3498db;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #2980b9;
+    }
+
+    .btn-delete {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #c0392b;
+    }
+
+    @@media (max-width: 700px) {
+        .form-row {
+            flex-direction: column;
+        }
+
+        .my-product {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+@code {
+    private List<Product> myProducts = new();
+    private List<string> allCategories = new();
+    private ProductForm form = new();
+    private bool showForm;
+    private int editingProductId;
+    private string successMessage = "";
+    private string errorMessage = "";
+
+    private string SellerName => AuthStateService.CurrentUser != null
+        ? $"{AuthStateService.CurrentUser.FirstName} {AuthStateService.CurrentUser.LastName}".Trim()
+        : "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ProductService.SeedProductsAsync();
+        allCategories = await ProductService.GetCategoriesAsync();
+
+        if (allCategories.Count == 0)
+        {
+            allCategories = new List<string>
+            {
+                "Clothing", "Food", "Furniture", "Electronics", "Books",
+                "Games", "Sports", "Beauty", "Automotive", "Home & Garden"
+            };
+        }
+
+        await LoadMyProducts();
+    }
+
+    private async Task LoadMyProducts()
+    {
+        if (AuthStateService.CurrentUser != null)
+        {
+            myProducts = await ProductService.GetProductsBySellerAsync(SellerName);
+        }
+    }
+
+    private void StartNewProduct()
+    {
+        form = new ProductForm { Category = "Clothing", Rating = 4.0 };
+        editingProductId = 0;
+        showForm = true;
+        successMessage = "";
+        errorMessage = "";
+    }
+
+    private void EditProduct(Product product)
+    {
+        form = new ProductForm
+        {
+            Name = product.Name ?? "",
+            Price = product.Price,
+            Category = product.Category ?? "Clothing",
+            Description = product.Description ?? "",
+            ImageUrl = product.ImageUrl ?? "",
+            Rating = product.Rating <= 0 ? 4.0 : product.Rating
+        };
+        editingProductId = product.Id;
+        showForm = true;
+        successMessage = "";
+        errorMessage = "";
+    }
+
+    private void CancelForm()
+    {
+        showForm = false;
+        editingProductId = 0;
+        form = new ProductForm();
+    }
+
+    private async Task SaveProduct()
+    {
+        errorMessage = "";
+        successMessage = "";
+
+        if (string.IsNullOrWhiteSpace(form.Name))
+        {
+            errorMessage = "Please enter a product name.";
+            return;
+        }
+
+        if (form.Price <= 0)
+        {
+            errorMessage = "Please enter a valid price greater than zero.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(form.Category))
+        {
+            errorMessage = "Please choose a category.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(form.ImageUrl))
+        {
+            errorMessage = "Please enter an image URL so buyers can see your product.";
+            return;
+        }
+
+        var rating = Math.Clamp(form.Rating, 1, 5);
+
+        if (editingProductId == 0)
+        {
+            var newProduct = new Product
+            {
+                Name = form.Name.Trim(),
+                Price = form.Price,
+                Category = form.Category,
+                Description = form.Description?.Trim(),
+                ImageUrl = form.ImageUrl.Trim(),
+                Rating = rating,
+                SellerName = SellerName
+            };
+
+            await ProductService.AddProductAsync(newProduct);
+            successMessage = $"✅ \"{newProduct.Name}\" was listed successfully!";
+        }
+        else
+        {
+            var product = new Product
+            {
+                Id = editingProductId,
+                Name = form.Name.Trim(),
+                Price = form.Price,
+                Category = form.Category,
+                Description = form.Description?.Trim(),
+                ImageUrl = form.ImageUrl.Trim(),
+                Rating = rating,
+                SellerName = SellerName
+            };
+
+            var updated = await ProductService.UpdateProductAsync(product);
+
+            if (!updated)
+            {
+                errorMessage = "Could not update the product. It may have been removed.";
+                return;
+            }
+
+            successMessage = $"✅ \"{product.Name}\" was updated successfully!";
+        }
+
+        showForm = false;
+        editingProductId = 0;
+        form = new ProductForm();
+        await LoadMyProducts();
+    }
+
+    private async Task DeleteProduct(Product product)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to delete \"{product.Name}\"?");
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        var deleted = await ProductService.DeleteProductAsync(product.Id);
+
+        if (deleted)
+        {
+            successMessage = $"🗑️ \"{product.Name}\" was deleted.";
+        }
+        else
+        {
+            errorMessage = "Could not delete the product.";
+        }
+
+        await LoadMyProducts();
+    }
+
+    public class ProductForm
+    {
+        public string? Name { get; set; }
+        public decimal Price { get; set; }
+        public string? Category { get; set; }
+        public string? Description { get; set; }
+        public string? ImageUrl { get; set; }
+        public double Rating { get; set; } = 4.0;
+    }
+}

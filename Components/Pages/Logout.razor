@@ -1,10 +1,15 @@
 @page "/logout"
+@using CSE325_Team4_GroupProject.Services
+@inject AuthStateService AuthStateService
+@inject CSE325_Team4_GroupProject.Services.CartService CartService
 @inject NavigationManager NavigationManager
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Clear user session
+        // Clear user session and cart
+        AuthStateService.Logout();
+        await CartService.Clear();
         NavigationManager.NavigateTo("/", true);
     }
 }

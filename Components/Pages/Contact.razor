@@ -1,0 +1,203 @@
+@page "/contact"
+
+<PageTitle>ShopHub - Contact Us</PageTitle>
+
+<div class="contact-page">
+    <h1>Contact Us</h1>
+    <p class="subtitle">We'd love to hear from you! Send us a message and we'll get back within 24 hours.</p>
+
+    @if (messageSent)
+    {
+        <div class="alert alert-success">✅ Thank you @(name)! Your message has been received. We'll get back to you soon.</div>
+    }
+
+    <div class="contact-layout">
+        <div class="contact-form">
+            <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" class="form-control" placeholder="Enter your name" @bind="name" />
+            </div>
+            <div class="form-group">
+                <label>Your Email</label>
+                <input type="email" class="form-control" placeholder="Enter your email" @bind="email" />
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <input type="text" class="form-control" placeholder="How can we help?" @bind="subject" />
+            </div>
+            <div class="form-group">
+                <label>Message</label>
+                <textarea class="form-control" rows="5" placeholder="Write your message..." @bind="message"></textarea>
+            </div>
+            <button class="btn btn-primary" @onclick="SendMessage">Send Message</button>
+        </div>
+
+        <div class="contact-info">
+            <div class="info-card">
+                <span class="info-icon">📞</span>
+                <h3>Phone</h3>
+                <p>+234 800 000 0000</p>
+            </div>
+            <div class="info-card">
+                <span class="info-icon">✉️</span>
+                <h3>Email</h3>
+                <p>support@shophub.com</p>
+            </div>
+            <div class="info-card">
+                <span class="info-icon">📍</span>
+                <h3>Address</h3>
+                <p>123 Market Street, Lagos, Nigeria</p>
+            </div>
+            <div class="info-card">
+                <span class="info-icon">🕐</span>
+                <h3>Working Hours</h3>
+                <p>Mon - Sat: 8am - 8pm</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .contact-page {
+        padding: 20px 0;
+    }
+
+    .contact-page h1 {
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        color: #7f8c8d;
+        margin-bottom: 25px;
+    }
+
+    .alert {
+        padding: 12px 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .contact-layout {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 25px;
+    }
+
+    .contact-form {
+        background: white;
+        border: 1px solid #ecf0f1;
+        border-radius: 10px;
+        padding: 25px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .btn {
+        padding: 12px 28px;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-primary {
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+
+    .btn-primary:hover {
+        background: #f39c12;
+        transform: translateY(-2px);
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 18px;
+        text-align: center;
+    }
+
+    .info-icon {
+        font-size: 30px;
+    }
+
+    .info-card h3 {
+        color: #2c3e50;
+        margin: 8px 0 4px;
+        font-size: 16px;
+    }
+
+    .info-card p {
+        color: #7f8c8d;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    @@media (max-width: 800px) {
+        .contact-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@code {
+    private string name = "";
+    private string email = "";
+    private string subject = "";
+    private string message = "";
+    private bool messageSent;
+
+    private void SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        messageSent = true;
+        StateHasChanged();
+    }
+}

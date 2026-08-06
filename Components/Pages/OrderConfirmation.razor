@@ -1,0 +1,105 @@
+@page "/order-success"
+@inject NavigationManager Navigation
+
+<PageTitle>ShopHub - Order Confirmed</PageTitle>
+
+<div class="confirmation-page">
+    <div class="confirmation-card">
+        <div class="checkmark">✅</div>
+        <h1>Order Confirmed!</h1>
+        <p>Thank you for shopping with ShopHub. 🎉</p>
+        <p class="order-detail">
+            Your order <b>#SH-@OrderNumber</b> has been placed successfully.<br />
+            A confirmation has been sent to your email. You'll receive a tracking link once your items ship.
+        </p>
+        <div class="buttons">
+            <a class="btn btn-primary" href="/products">Continue Shopping</a>
+            <a class="btn btn-secondary" href="/">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .confirmation-page {
+        display: flex;
+        justify-content: center;
+        padding: 60px 20px;
+    }
+
+    .confirmation-card {
+        text-align: center;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        padding: 50px 40px;
+        max-width: 520px;
+    }
+
+    .checkmark {
+        font-size: 64px;
+        margin-bottom: 15px;
+    }
+
+    .confirmation-card h1 {
+        color: #2c3e50;
+        margin: 0 0 10px;
+    }
+
+    .confirmation-card p {
+        color: #555;
+        font-size: 16px;
+        margin: 8px 0;
+    }
+
+    .order-detail {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        line-height: 1.6;
+        margin: 20px 0;
+    }
+
+    .buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+    .btn {
+        padding: 12px 28px;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-primary {
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+
+    .btn-primary:hover {
+        background: #f39c12;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #2c3e50;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #1a252f;
+        transform: translateY(-2px);
+    }
+</style>
+
+@code {
+    private string OrderNumber { get; set; } = Guid.NewGuid().ToString("N")[..8].ToUpper();
+}

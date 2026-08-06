@@ -12,7 +12,7 @@
         <p>Buy and sell items with ease</p>
         <div class="hero-buttons">
             <a href="/products" class="btn btn-primary">Browse Products</a>
-            <a href="/signup" class="btn btn-secondary">Start Selling</a>
+            <a href="/become-seller" class="btn btn-secondary">Start Selling</a>
         </div>
     </section>
 
@@ -20,16 +20,13 @@
     <section class="categories">
         <h2>Shop by Category</h2>
         <div class="category-grid">
-            <div class="category-card">👕 Clothing</div>
-            <div class="category-card">🍕 Food</div>
-            <div class="category-card">🪑 Furniture</div>
-            <div class="category-card">📱 Electronics</div>
-            <div class="category-card">📚 Books</div>
-            <div class="category-card">🎮 Games</div>
-            <div class="category-card">👟 Sports</div>
-            <div class="category-card">💄 Beauty</div>
-            <div class="category-card">🚗 Automotive</div>
-            <div class="category-card">🏠 Home & Garden</div>
+            @foreach (var category in categories)
+            {
+                <a class="category-card" href="@category.Url">
+                    <span class="category-icon">@category.Icon</span>
+                    <span class="category-name">@category.Name</span>
+                </a>
+            }
         </div>
     </section>
 
@@ -60,28 +57,28 @@
                 <h3>Wireless Earbuds</h3>
                 <p class="old-price">₦25,000</p>
                 <p class="deal-price">₦20,000</p>
-                <button class="btn-deal">Shop Now</button>
+                <a class="btn-deal" href="/category/Electronics">Shop Now</a>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-15%</span>
                 <h3>Smart Watch</h3>
                 <p class="old-price">₦50,000</p>
                 <p class="deal-price">₦42,500</p>
-                <button class="btn-deal">Shop Now</button>
+                <a class="btn-deal" href="/category/Electronics">Shop Now</a>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-30%</span>
                 <h3>Running Shoes</h3>
                 <p class="old-price">₦35,000</p>
                 <p class="deal-price">₦24,500</p>
-                <button class="btn-deal">Shop Now</button>
+                <a class="btn-deal" href="/category/Sports">Shop Now</a>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-10%</span>
                 <h3>Laptop Bag</h3>
                 <p class="old-price">₦15,000</p>
                 <p class="deal-price">₦13,500</p>
-                <button class="btn-deal">Shop Now</button>
+                <a class="btn-deal" href="/category/Clothing">Shop Now</a>
             </div>
         </div>
     </section>
@@ -223,17 +220,35 @@
 
     .category-card {
         background: #ecf0f1;
-        padding: 20px;
+        padding: 20px 15px;
         text-align: center;
         border-radius: 8px;
         cursor: pointer;
-        transition: transform 0.3s, box-shadow 0.3s;
-        font-size: 16px;
+        transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+        text-decoration: none;
+        color: #2c3e50;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+        border: 2px solid transparent;
     }
 
     .category-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        background: white;
+        border-color: #f1c40f;
+    }
+
+    .category-icon {
+        font-size: 32px;
+        line-height: 1;
+    }
+
+    .category-name {
+        font-size: 15px;
+        font-weight: 600;
     }
 
     .product-grid {
@@ -300,6 +315,9 @@
         font-weight: bold;
         transition: background 0.3s;
         margin-top: 10px;
+        text-decoration: none;
+        color: #2c3e50;
+        display: inline-block;
     }
 
     .btn-deal:hover {
@@ -351,7 +369,7 @@
     }
 
     .why-card:hover {
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
     }
 
     .why-icon {
@@ -375,6 +393,25 @@
 @code {
     private List<Product> featuredProducts = new();
     private bool isLoading = true;
+
+    private record CategoryLink(string Icon, string Name)
+    {
+        public string Url => $"/category/{Uri.EscapeDataString(Name)}";
+    }
+
+    private static readonly List<CategoryLink> categories = new()
+    {
+        new("👕", "Clothing"),
+        new("🍕", "Food"),
+        new("🪑", "Furniture"),
+        new("📱", "Electronics"),
+        new("📚", "Books"),
+        new("🎮", "Games"),
+        new("👟", "Sports"),
+        new("💄", "Beauty"),
+        new("🚗", "Automotive"),
+        new("🏠", "Home & Garden")
+    };
 
     protected override async Task OnInitializedAsync()
     {

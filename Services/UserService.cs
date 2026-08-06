@@ -71,4 +71,53 @@ public class UserService
         return await _context.Users
             .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == emailLower);
     }
+
+    public async Task<User?> UpdateProfileAsync(User user, CancellationToken cancellationToken = default)
+    {
+        if (user == null)
+        {
+            return null;
+        }
+
+        var existing = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
+
+        if (existing == null)
+        {
+            return null;
+        }
+
+        existing.FirstName = user.FirstName;
+        existing.LastName = user.LastName;
+        existing.PhoneNumber = user.PhoneNumber;
+        existing.Address = user.Address;
+        existing.ProfileImage = user.ProfileImage;
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return existing;
+    }
+
+    public async Task<bool> ChangePasswordAsync(
+        int userId,
+        string currentPassword,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword))
+        {
+            return false;
+        }
+
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user == null || user.Password != currentPassword)
+        {
+            return false;
+        }
+
+        user.Password = newPassword;
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 }

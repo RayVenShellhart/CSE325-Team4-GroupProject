@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject CSE325_Team4_GroupProject.Services.CartService CartService
 @inject CSE325_Team4_GroupProject.Services.AuthStateService AuthStateService
+@inject NavigationManager Navigation
 @implements IDisposable
 
 <div class="page-container">
@@ -10,17 +11,22 @@
             <div class="header-content">
                 <a href="/" class="logo">🛒 ShopHub</a>
                 <div class="search-bar">
-                    <input type="text" placeholder="Search for products..." />
-                    <button>🔍</button>
+                    <input
+                        type="text"
+                        placeholder="Search for products..."
+                        value="@searchTerm"
+                        @oninput="OnSearchInput"
+                        @onkeydown="OnSearchKey" />
+                    <button @onclick="DoSearch" title="Search">🔍</button>
                 </div>
                 <div class="nav-links">
                     <a href="/products">Products</a>
+                    <a href="/seller">Sell</a>
                     <a href="/cart">🛒 Cart <span class="cart-count">@CartService.ItemCount</span></a>
 
                     @if (AuthStateService.CurrentUser != null)
                     {
-                        <span class="user-greeting">👋 @AuthStateService.CurrentUser.FirstName</span>
-                        <a href="/profile">Profile</a>
+                        <a class="user-greeting" href="/profile">👋 @AuthStateService.CurrentUser.FirstName</a>
                         <a href="#" @onclick="Logout" @onclick:preventDefault="true">Logout</a>
                     }
                     else
@@ -47,21 +53,32 @@
                 <div>
                     <h4>ShopHub</h4>
                     <p>Buy and sell items easily</p>
-                </div>
-                <div>
-                    <h4>Quick Links</h4>
-                    <a href="/products">Products</a>
-                    <a href="/about">About</a>
+                    <a href="/about">About Us</a>
                     <a href="/contact">Contact</a>
                 </div>
                 <div>
-                    <h4>Account</h4>
-                    <a href="/login">Login</a>
-                    <a href="/signup">Sign Up</a>
+                    <h4>Quick Links</h4>
+                    <a href="/products">All Products</a>
+                    <a href="/become-seller">Become a Seller</a>
+                    <a href="/seller">Seller Dashboard</a>
                 </div>
                 <div>
-                    <h4>Follow Us</h4>
-                    <p>Social media links</p>
+                    <h4>Account</h4>
+                    @if (AuthStateService.CurrentUser != null)
+                    {
+                        <a href="/profile">My Profile</a>
+                        <a href="#" @onclick="Logout" @onclick:preventDefault="true">Logout</a>
+                    }
+                    else
+                    {
+                        <a href="/login">Login</a>
+                        <a href="/signup">Sign Up</a>
+                    }
+                </div>
+                <div>
+                    <h4>Legal</h4>
+                    <a href="/terms">Terms & Conditions</a>
+                    <a href="/privacy">Privacy Policy</a>
                 </div>
             </div>
             <div class="footer-bottom">
@@ -135,6 +152,11 @@
         border-radius: 0 5px 5px 0;
         cursor: pointer;
         font-size: 16px;
+        transition: background 0.3s;
+    }
+
+    .search-bar button:hover {
+        background: #f39c12;
     }
 
     .nav-links {
@@ -159,6 +181,10 @@
         color: #f1c40f;
         font-weight: bold;
         font-size: 14px;
+    }
+
+    .user-greeting:hover {
+        color: #f39c12;
     }
 
     .cart-count {
@@ -206,7 +232,7 @@
     .footer-content p {
         color: #bdc3c7;
         font-size: 14px;
-        margin: 0;
+        margin: 0 0 10px;
     }
 
     .footer-content a {
@@ -231,10 +257,39 @@
 </style>
 
 @code {
-    protected override void OnInitialized()
+    private string searchTerm = "";
+
+    protected override async Task OnInitializedAsync()
     {
         CartService.Changed += OnCartChanged;
         AuthStateService.OnChange += OnAuthStateChanged;
+        await CartService.LoadCartAsync();
+    }
+
+    private void OnSearchInput(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+    }
+
+    private void OnSearchKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            DoSearch();
+        }
+    }
+
+    private void DoSearch()
+    {
+        var term = searchTerm.Trim();
+
+        if (string.IsNullOrEmpty(term))
+        {
+            Navigation.NavigateTo("/products");
+            return;
+        }
+
+        Navigation.NavigateTo($"/products?search={Uri.EscapeDataString(term)}");
     }
 
     private async void OnCartChanged()
@@ -250,7 +305,8 @@
     private async Task Logout()
     {
         AuthStateService.Logout();
-        NavigationManager?.NavigateTo("/", true);
+        await CartService.Clear();
+        Navigation.NavigateTo("/", true);
     }
 
     public void Dispose()
@@ -258,7 +314,4 @@
         CartService.Changed -= OnCartChanged;
         AuthStateService.OnChange -= OnAuthStateChanged;
     }
-
-    [Inject]
-    private NavigationManager? NavigationManager { get; set; }
 }

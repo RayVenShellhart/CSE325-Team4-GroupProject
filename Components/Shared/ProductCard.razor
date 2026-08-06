@@ -4,7 +4,13 @@
 
 <div class="product-card" @onclick="NavigateToProduct">
 
-    <img src="@Product.ImageUrl" alt="@Product.Name" />
+    <div class="card-image">
+        <img src="@Product.ImageUrl" alt="@Product.Name" loading="lazy" />
+        @if (!string.IsNullOrWhiteSpace(Product.Category))
+        {
+            <span class="category-badge">@Product.Category</span>
+        }
+    </div>
 
     <div class="product-info">
 
@@ -14,22 +20,18 @@
             @Product.Description
         </p>
 
-        <span class="price">
-            ₦@Product.Price
-        </span>
-
-        <div class="rating">
-            ⭐ @Product.Rating
+        <div class="price-row">
+            <span class="price">
+                ₦@Product.Price
+            </span>
+            <div class="rating">
+                ⭐ @Product.Rating
+            </div>
         </div>
 
-        <button type="button" class="add-to-cart" @onclick="AddToCart" @onclick:stopPropagation="true">
-            @buttonText
+        <button type="button" class="add-to-cart @(added ? "added" : "")" @onclick="AddToCart" @onclick:stopPropagation="true">
+            @(added ? "✓ Added" : (isAdding ? "Adding..." : "🛒 Add to Cart"))
         </button>
-
-        @if (!string.IsNullOrWhiteSpace(statusMessage))
-        {
-            <p class="cart-status">@statusMessage</p>
-        }
 
     </div>
 
@@ -43,6 +45,8 @@
         overflow: hidden;
         transition: transform .3s, box-shadow .3s;
         cursor: pointer;
+        display: flex;
+        flex-direction: column;
     }
 
     .product-card:hover {
@@ -50,14 +54,34 @@
         box-shadow: 0 5px 20px rgba(0, 0, 0, .15);
     }
 
+    .card-image {
+        position: relative;
+    }
+
     .product-card img {
         width: 100%;
         height: 200px;
         object-fit: cover;
+        display: block;
+    }
+
+    .category-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(44, 62, 80, 0.85);
+        color: white;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
     }
 
     .product-info {
         padding: 15px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
     }
 
     .product-card h3 {
@@ -69,18 +93,25 @@
         color: #7f8c8d;
         font-size: 14px;
         margin: 5px 0;
+        flex: 1;
+    }
+
+    .price-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
     }
 
     .price {
         color: #e74c3c;
         font-size: 20px;
         font-weight: bold;
-        display: block;
     }
 
     .rating {
         color: #f1c40f;
-        margin: 8px 0;
+        font-size: 14px;
     }
 
     .add-to-cart {
@@ -91,16 +122,23 @@
         background: #2c3e50;
         color: white;
         cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background 0.3s, transform 0.2s;
     }
 
     .add-to-cart:hover {
         background: #1a252f;
+        transform: translateY(-1px);
     }
 
-    .cart-status {
-        margin-top: 10px;
-        color: green;
-        font-size: 14px;
+    .add-to-cart.added {
+        background: #27ae60;
+    }
+
+    .add-to-cart:disabled {
+        opacity: 0.7;
+        cursor: wait;
     }
 </style>
 
@@ -109,8 +147,8 @@
     [Parameter]
     public Product Product { get; set; } = new();
 
-    private string buttonText = "Add to Cart";
-    private string? statusMessage;
+    private bool isAdding;
+    private bool added;
 
     private void NavigateToProduct()
     {
@@ -119,12 +157,20 @@
 
     private async Task AddToCart()
     {
+        if (isAdding)
+        {
+            return;
+        }
+
+        isAdding = true;
         await Cart.Add(Product);
+        isAdding = false;
+        added = true;
 
-        buttonText = "Added";
+        StateHasChanged();
 
-        statusMessage = $"{Product.Name} added to cart";
-
+        await Task.Delay(1500);
+        added = false;
         StateHasChanged();
     }
 }

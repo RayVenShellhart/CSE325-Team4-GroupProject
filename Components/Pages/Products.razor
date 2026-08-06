@@ -1,25 +1,24 @@
 @page "/products"
 @using CSE325_Team4_GroupProject.Models
+@using Microsoft.AspNetCore.WebUtilities
 @inject CSE325_Team4_GroupProject.Services.ProductService ProductService
+@inject NavigationManager Navigation
 
 <PageTitle>ShopHub - Products</PageTitle>
 
 <div class="products-page">
     <h1>All Products</h1>
+    <p class="product-count">@filteredProducts.Count product@(filteredProducts.Count == 1 ? "" : "s") found</p>
 
     <div class="filters">
         <div class="filter-group">
             <label>Category:</label>
-            <select @bind="selectedCategory">
+            <select value="@selectedCategory" @onchange="OnCategoryChanged">
                 <option value="">All</option>
-                <option value="Clothing">Clothing</option>
-                <option value="Electronics">Electronics</option>
-                <option value="Furniture">Furniture</option>
-                <option value="Books">Books</option>
-                <option value="Food">Food</option>
-                <option value="Games">Games</option>
-                <option value="Sports">Sports</option>
-                <option value="Beauty">Beauty</option>
+                @foreach (var category in categories)
+                {
+                    <option value="@category">@category</option>
+                }
             </select>
         </div>
 
@@ -35,21 +34,41 @@
 
         <div class="filter-group">
             <label>Search:</label>
-            <input type="text" @bind="searchTerm" placeholder="Search products..." />
+            <input type="text" value="@searchTerm" @oninput="OnSearchChanged" placeholder="Search products..." />
         </div>
-    </div>
 
-    <div class="product-grid">
-        @foreach (var product in filteredProducts)
+        @if (!string.IsNullOrEmpty(selectedCategory) || !string.IsNullOrEmpty(searchTerm))
         {
-            <ProductCard Product="product" />
+            <button class="clear-filters" @onclick="ClearFilters">✕ Clear filters</button>
         }
     </div>
+
+    @if (!filteredProducts.Any())
+    {
+        <div class="no-results">
+            <p>😕 No products match your search.</p>
+            <a class="btn btn-primary" href="/products">View all products</a>
+        </div>
+    }
+    else
+    {
+        <div class="product-grid">
+            @foreach (var product in filteredProducts)
+            {
+                <ProductCard Product="product" />
+            }
+        </div>
+    }
 </div>
 
 <style>
     .products-page {
         padding: 20px 0;
+    }
+
+    .product-count {
+        color: #7f8c8d;
+        margin-top: 0;
     }
 
     .filters {
@@ -60,6 +79,7 @@
         padding: 20px;
         background: #f8f9fa;
         border-radius: 8px;
+        align-items: center;
     }
 
     .filter-group {
@@ -85,15 +105,64 @@
         min-width: 200px;
     }
 
+    .clear-filters {
+        margin-left: auto;
+        padding: 8px 14px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s;
+    }
+
+    .clear-filters:hover {
+        background: #c0392b;
+    }
+
     .product-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 20px;
     }
+
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .no-results p {
+        font-size: 17px;
+        color: #555;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.3s;
+    }
+
+    .btn-primary {
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+
+    .btn-primary:hover {
+        background: #f39c12;
+    }
 </style>
 
 @code {
     private List<Product> allProducts = new();
+    private List<string> categories = new();
     private string selectedCategory = "";
     private string sortBy = "name";
     private string searchTerm = "";
@@ -133,5 +202,60 @@
     {
         await ProductService.SeedProductsAsync();
         allProducts = await ProductService.GetAllProductsAsync();
+        categories = await ProductService.GetCategoriesAsync();
+        ApplyQueryParameters();
+    }
+
+    private void ApplyQueryParameters()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("category", out var categoryValue))
+        {
+            selectedCategory = categoryValue.ToString();
+        }
+
+        if (query.TryGetValue("search", out var searchValue))
+        {
+            searchTerm = searchValue.ToString();
+        }
+    }
+
+    private void OnCategoryChanged(ChangeEventArgs e)
+    {
+        selectedCategory = e.Value?.ToString() ?? "";
+        UpdateUrl();
+    }
+
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        StateHasChanged();
+    }
+
+    private void UpdateUrl()
+    {
+        var query = new Dictionary<string, string?>();
+
+        if (!string.IsNullOrEmpty(selectedCategory))
+        {
+            query["category"] = selectedCategory;
+        }
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query["search"] = searchTerm;
+        }
+
+        var url = QueryHelpers.AddQueryString("/products", query);
+        Navigation.NavigateTo(url, replace: true);
+    }
+
+    private void ClearFilters()
+    {
+        selectedCategory = "";
+        searchTerm = "";
+        Navigation.NavigateTo("/products", replace: true);
     }
 }

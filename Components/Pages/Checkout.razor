@@ -1,5 +1,7 @@
 @page "/checkout"
+@using CSE325_Team4_GroupProject.Services
 @inject CSE325_Team4_GroupProject.Services.CartService Cart
+@inject AuthStateService AuthStateService
 @inject NavigationManager Navigation
 
 <PageTitle>ShopHub - Checkout</PageTitle>
@@ -19,19 +21,43 @@
         <div class="checkout-layout">
             <div class="checkout-form">
                 <h2>Shipping Information</h2>
-                <label>Name</label>
-                <input placeholder="Full name" />
 
-                <label>Address</label>
-                <input placeholder="Street address" />
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
 
-                <label>City</label>
-                <input placeholder="City" />
+                <label>Full Name *</label>
+                <input placeholder="Full name" @bind="checkoutModel.Name" />
 
-                <label>Phone</label>
-                <input placeholder="Phone number" />
+                <label>Email *</label>
+                <input type="email" placeholder="you@example.com" @bind="checkoutModel.Email" />
 
-                <button class="btn btn-primary place-order-btn" @onclick="PlaceOrder">Place Order</button>
+                <label>Street Address *</label>
+                <input placeholder="Street address" @bind="checkoutModel.Address" />
+
+                <div class="form-row">
+                    <div class="half">
+                        <label>City *</label>
+                        <input placeholder="City" @bind="checkoutModel.City" />
+                    </div>
+                    <div class="half">
+                        <label>State</label>
+                        <input placeholder="State" @bind="checkoutModel.State" />
+                    </div>
+                </div>
+
+                <label>Phone *</label>
+                <input placeholder="Phone number" @bind="checkoutModel.Phone" />
+
+                <div class="delivery-row">
+                    <span>🚚 Delivery</span>
+                    <span>₦1,500.00</span>
+                </div>
+
+                <button class="btn btn-primary place-order-btn" @onclick="PlaceOrder" disabled="@isPlacingOrder">
+                    @(isPlacingOrder ? "Placing order..." : "Place Order")
+                </button>
             </div>
 
             <div class="summary-card">
@@ -43,9 +69,13 @@
                         <span>₦@((item.Price * item.Quantity).ToString("0.00"))</span>
                     </div>
                 }
+                <div class="summary-row">
+                    <span>Delivery</span>
+                    <span>₦1,500.00</span>
+                </div>
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>₦@Cart.TotalPrice.ToString("0.00")</span>
+                    <span>₦@GrandTotal.ToString("0.00")</span>
                 </div>
             </div>
         </div>
@@ -54,23 +84,105 @@
 
 <style>
     .checkout-page { padding: 20px 0; }
+    .checkout-page h1 { color: #2c3e50; margin-bottom: 20px; }
     .checkout-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-    .checkout-form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .checkout-form input { display: block; width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 5px; }
-    .place-order-btn { width: 100%; padding: 12px; margin-top: 10px; }
+    .checkout-form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+    .checkout-form label { display: block; font-weight: 600; font-size: 13px; margin: 12px 0 5px; color: #2c3e50; }
+    .checkout-form input { display: block; width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; box-sizing: border-box; }
+    .checkout-form input:focus { border-color: #3498db; outline: none; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
+
+    .form-row { display: flex; gap: 15px; }
+    .form-row .half { flex: 1; }
+    .form-row .half label { margin-top: 12px; }
+
+    .alert {
+        padding: 12px 15px;
+        border-radius: 6px;
+        margin: 10px 0;
+        font-size: 14px;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .delivery-row {
+        display: flex;
+        justify-content: space-between;
+        background: #f8f9fa;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin-top: 15px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .place-order-btn { width: 100%; padding: 12px; margin-top: 16px; }
     .summary-card { background: #f8f9fa; padding: 20px; border-radius: 8px; height: fit-content; }
-    .summary-item, .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    .summary-row.total { font-weight: bold; font-size: 18px; }
+    .summary-card h2 { margin-top: 0; color: #2c3e50; }
+    .summary-item, .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+    .summary-row.total { font-weight: bold; font-size: 18px; border-top: 1px solid #ddd; padding-top: 10px; }
     .empty-cart { text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; }
     .btn { padding: 10px 18px; text-decoration: none; display: inline-block; }
-    .btn-primary { background: #f1c40f; color: #2c3e50; border: none; border-radius: 5px; cursor: pointer; }
+    .btn-primary { background: #f1c40f; color: #2c3e50; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; transition: background 0.3s; }
+    .btn-primary:hover:not(:disabled) { background: #f39c12; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
     @@media (max-width: 900px) { .checkout-layout { grid-template-columns: 1fr; } }
 </style>
 
 @code {
-    private void PlaceOrder()
+    private const decimal DeliveryFee = 1500.00M;
+
+    private CheckoutModel checkoutModel = new();
+    private string errorMessage = "";
+    private bool isPlacingOrder;
+
+    private decimal GrandTotal => Cart.TotalPrice + DeliveryFee;
+
+    protected override async Task OnInitializedAsync()
     {
-        Cart.Clear();
-        Navigation.NavigateTo("/");
+        await Cart.LoadCartAsync();
+
+        var user = AuthStateService.CurrentUser;
+
+        if (user != null)
+        {
+            checkoutModel.Name = $"{user.FirstName} {user.LastName}".Trim();
+            checkoutModel.Email = user.Email ?? "";
+            checkoutModel.Phone = user.PhoneNumber ?? "";
+            checkoutModel.Address = user.Address ?? "";
+        }
+    }
+
+    private async Task PlaceOrder()
+    {
+        errorMessage = "";
+
+        if (string.IsNullOrWhiteSpace(checkoutModel.Name) ||
+            string.IsNullOrWhiteSpace(checkoutModel.Email) ||
+            string.IsNullOrWhiteSpace(checkoutModel.Address) ||
+            string.IsNullOrWhiteSpace(checkoutModel.City) ||
+            string.IsNullOrWhiteSpace(checkoutModel.Phone))
+        {
+            errorMessage = "Please fill in all required fields (marked with *).";
+            return;
+        }
+
+        isPlacingOrder = true;
+        await Task.Delay(600); // Simulate processing
+        await Cart.Clear();
+        Navigation.NavigateTo("/order-success");
+    }
+
+    public class CheckoutModel
+    {
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public string? Address { get; set; }
+        public string? City { get; set; }
+        public string? State { get; set; }
+        public string? Phone { get; set; }
     }
 }

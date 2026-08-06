@@ -1,0 +1,443 @@
+@page "/profile"
+@using CSE325_Team4_GroupProject.Models
+@using CSE325_Team4_GroupProject.Services
+@inject UserService UserService
+@inject AuthStateService AuthStateService
+@inject NavigationManager Navigation
+
+<PageTitle>ShopHub - My Profile</PageTitle>
+
+@if (AuthStateService.CurrentUser == null)
+{
+    <div class="login-required">
+        <h1>🔒 Login required</h1>
+        <p>Please login to view and edit your profile.</p>
+        <a class="btn btn-primary" href="/login">Login</a>
+        <a class="btn btn-secondary" href="/signup">Create Account</a>
+    </div>
+}
+else
+{
+    var user = AuthStateService.CurrentUser;
+
+    <div class="profile-page">
+        <div class="profile-card">
+            <div class="profile-side">
+                <div class="avatar">@Initials(user)</div>
+                <h2>@user.FirstName @user.LastName</h2>
+                <span class="user-type-badge">@TypeLabel(user.UserType)</span>
+                <p class="member-since">Member since @user.CreatedAt.ToString("MMMM yyyy")</p>
+                @if (IsSeller(user.UserType))
+                {
+                    <a class="btn btn-secondary" href="/seller">📦 Seller Dashboard</a>
+                }
+            </div>
+
+            <div class="profile-main">
+                @if (!string.IsNullOrEmpty(profileMessage))
+                {
+                    <div class="alert alert-@(profileError ? "danger" : "success")">@profileMessage</div>
+                }
+
+                <!-- INFO CARD -->
+                <div class="info-section">
+                    <h3>👤 Personal Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item"><label>Email</label><span>@user.Email</span></div>
+                        <div class="info-item"><label>Account Type</label><span>@TypeLabel(user.UserType)</span></div>
+                        <div class="info-item"><label>Phone</label><span>@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "—" : user.PhoneNumber)</span></div>
+                        <div class="info-item"><label>Address</label><span>@(string.IsNullOrWhiteSpace(user.Address) ? "—" : user.Address)</span></div>
+                    </div>
+                </div>
+
+                <!-- EDIT FORM -->
+                <div class="edit-section">
+                    <h3>✏️ Edit Profile</h3>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>First Name</label>
+                            <input type="text" class="form-control" @bind="editModel.FirstName" />
+                        </div>
+                        <div class="form-group half">
+                            <label>Last Name</label>
+                            <input type="text" class="form-control" @bind="editModel.LastName" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Phone Number</label>
+                            <input type="tel" class="form-control" placeholder="Optional" @bind="editModel.PhoneNumber" />
+                        </div>
+                        <div class="form-group half">
+                            <label>Address</label>
+                            <input type="text" class="form-control" placeholder="Optional" @bind="editModel.Address" />
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" @onclick="SaveProfile">💾 Save Changes</button>
+                </div>
+
+                <!-- CHANGE PASSWORD -->
+                <div class="edit-section">
+                    <h3>🔑 Change Password</h3>
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" class="form-control" @bind="passwordModel.CurrentPassword" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>New Password</label>
+                            <input type="password" class="form-control" @bind="passwordModel.NewPassword" />
+                        </div>
+                        <div class="form-group half">
+                            <label>Confirm New Password</label>
+                            <input type="password" class="form-control" @bind="passwordModel.ConfirmPassword" />
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" @onclick="SavePassword">Update Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .profile-page {
+        padding: 20px 0;
+    }
+
+    .login-required {
+        text-align: center;
+        padding: 50px 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .login-required p {
+        color: #555;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .profile-card {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 25px;
+    }
+
+    .profile-side {
+        background: linear-gradient(160deg, #2c3e50, #3498db);
+        color: white;
+        border-radius: 12px;
+        padding: 30px 20px;
+        text-align: center;
+        height: fit-content;
+    }
+
+    .avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: #f1c40f;
+        color: #2c3e50;
+        font-size: 36px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+    }
+
+    .profile-side h2 {
+        margin: 0 0 10px;
+        font-size: 22px;
+    }
+
+    .user-type-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .member-since {
+        opacity: 0.8;
+        font-size: 13px;
+        margin: 12px 0 18px;
+    }
+
+    .profile-main {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .info-section,
+    .edit-section {
+        background: white;
+        border: 1px solid #ecf0f1;
+        border-radius: 10px;
+        padding: 22px;
+    }
+
+    .info-section h3,
+    .edit-section h3 {
+        color: #2c3e50;
+        margin: 0 0 16px;
+        font-size: 18px;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 12px;
+        color: #7f8c8d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 3px;
+    }
+
+    .info-item span {
+        font-size: 15px;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 15px;
+    }
+
+    .form-group {
+        margin-bottom: 14px;
+        flex: 1;
+    }
+
+    .form-group.half {
+        flex: 1;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .alert {
+        padding: 12px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .btn {
+        padding: 12px 26px;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .btn-primary {
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+
+    .btn-primary:hover {
+        background: #f39c12;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+        background: #2c3e50;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #1a252f;
+        transform: translateY(-2px);
+    }
+
+    @@media (max-width: 800px) {
+        .profile-card {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@code {
+    private EditModel editModel = new();
+    private PasswordModel passwordModel = new();
+    private string profileMessage = "";
+    private bool profileError;
+
+    private static bool IsSeller(string? userType) =>
+        string.Equals(userType, "Seller", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(userType, "Both", StringComparison.OrdinalIgnoreCase);
+
+    private static string TypeLabel(string? userType) => userType switch
+    {
+        "Seller" => "Seller",
+        "Both" => "Buyer & Seller",
+        _ => "Buyer"
+    };
+
+    private static string Initials(User user)
+    {
+        var first = string.IsNullOrWhiteSpace(user.FirstName) ? "" : user.FirstName[..1];
+        var last = string.IsNullOrWhiteSpace(user.LastName) ? "" : user.LastName[..1];
+        return (first + last).ToUpper();
+    }
+
+    protected override void OnInitialized()
+    {
+        var user = AuthStateService.CurrentUser;
+
+        if (user != null)
+        {
+            editModel.FirstName = user.FirstName ?? "";
+            editModel.LastName = user.LastName ?? "";
+            editModel.PhoneNumber = user.PhoneNumber ?? "";
+            editModel.Address = user.Address ?? "";
+        }
+    }
+
+    private async Task SaveProfile()
+    {
+        var user = AuthStateService.CurrentUser;
+
+        if (user == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editModel.FirstName) || string.IsNullOrWhiteSpace(editModel.LastName))
+        {
+            profileError = true;
+            profileMessage = "First and last name are required.";
+            return;
+        }
+
+        user.FirstName = editModel.FirstName.Trim();
+        user.LastName = editModel.LastName.Trim();
+        user.PhoneNumber = editModel.PhoneNumber?.Trim();
+        user.Address = editModel.Address?.Trim();
+
+        var updated = await UserService.UpdateProfileAsync(user);
+
+        if (updated == null)
+        {
+            profileError = true;
+            profileMessage = "Could not save your profile. Please try again.";
+            return;
+        }
+
+        AuthStateService.SetUser(updated);
+        profileError = false;
+        profileMessage = "✅ Your profile was updated successfully!";
+        StateHasChanged();
+    }
+
+    private async Task SavePassword()
+    {
+        var user = AuthStateService.CurrentUser;
+
+        if (user == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrEmpty(passwordModel.CurrentPassword) ||
+            string.IsNullOrEmpty(passwordModel.NewPassword))
+        {
+            profileError = true;
+            profileMessage = "Please fill in both password fields.";
+            return;
+        }
+
+        if (passwordModel.NewPassword.Length < 6)
+        {
+            profileError = true;
+            profileMessage = "New password must be at least 6 characters long.";
+            return;
+        }
+
+        if (passwordModel.NewPassword != passwordModel.ConfirmPassword)
+        {
+            profileError = true;
+            profileMessage = "New passwords do not match.";
+            return;
+        }
+
+        var changed = await UserService.ChangePasswordAsync(
+            user.Id,
+            passwordModel.CurrentPassword,
+            passwordModel.NewPassword);
+
+        if (!changed)
+        {
+            profileError = true;
+            profileMessage = "Your current password is incorrect.";
+            return;
+        }
+
+        passwordModel = new PasswordModel();
+        profileError = false;
+        profileMessage = "✅ Your password was changed successfully!";
+        StateHasChanged();
+    }
+
+    public class EditModel
+    {
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Address { get; set; }
+    }
+
+    public class PasswordModel
+    {
+        public string? CurrentPassword { get; set; }
+        public string? NewPassword { get; set; }
+        public string? ConfirmPassword { get; set; }
+    }
+}
