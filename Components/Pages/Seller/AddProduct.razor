@@ -1,0 +1,251 @@
+@page "/seller/products/add"
+@rendermode InteractiveServer
+@using CSE325_Team4_GroupProject.Models
+@using CSE325_Team4_GroupProject.Services
+@inject ProductService ProductService
+@inject AuthStateService AuthStateService
+@inject NavigationManager Navigation
+
+<PageTitle>ShopHub - Add Product</PageTitle>
+
+@if (!IsSeller)
+{
+    <div class="alert alert-warning mt-4">
+        <h4>Access denied</h4>
+        <p>You must be logged in as a Seller to add products.</p>
+        <a href="/login" class="btn btn-primary">Login</a>
+    </div>
+}
+else
+{
+    <div class="form-page">
+        <div class="form-header">
+            <h1>➕ Add Product</h1>
+            <a href="/seller/products" class="back-link">← Back to My Products</a>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <div class="form-card">
+            <div class="form-group">
+                <label>Product Name *</label>
+                <input class="form-control" @bind="model.Name" placeholder="e.g. Wireless Headphones" />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Price (₦) *</label>
+                    <input type="number" step="0.01" min="0" class="form-control" @bind="model.Price" />
+                </div>
+                <div class="form-group">
+                    <label>Stock *</label>
+                    <input type="number" min="0" class="form-control" @bind="model.Stock" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Category *</label>
+                <select class="form-control" @bind="model.Category">
+                    <option value="">Select category</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Books">Books</option>
+                    <option value="Food">Food</option>
+                    <option value="Games">Games</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Beauty">Beauty</option>
+                    <option value="Automotive">Automotive</option>
+                    <option value="Home & Garden">Home & Garden</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea class="form-control" rows="4" @bind="model.Description" placeholder="Describe your product..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Image URL</label>
+                <input class="form-control" @bind="model.ImageUrl" placeholder="https://example.com/image.jpg" />
+                <small class="hint">Paste a direct image link (e.g. from Unsplash). File upload can be added later.</small>
+            </div>
+
+            @if (!string.IsNullOrEmpty(model.ImageUrl))
+            {
+                <div class="preview">
+                    <img src="@model.ImageUrl" alt="Preview" onerror="this.style.display='none'" />
+                </div>
+            }
+
+            <div class="form-actions">
+                <button class="btn-save" @onclick="Save" disabled="@isSaving">
+                    @(isSaving ? "Saving..." : "Save Product")
+                </button>
+                <a href="/seller/products" class="btn-cancel">Cancel</a>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .form-page { max-width: 640px; margin: 0 auto; padding: 10px 0 40px; }
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .form-header h1 { margin: 0; font-size: 26px; color: #2c3e50; }
+    .back-link { color: #3498db; text-decoration: none; font-size: 14px; }
+    .form-card {
+        background: white;
+        padding: 28px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: #2c3e50;
+    }
+    .form-row { display: flex; gap: 16px; }
+    .form-row .form-group { flex: 1; }
+    .form-control {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+    .form-control:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52,152,219,0.12);
+    }
+    textarea.form-control { resize: vertical; }
+    .hint { color: #95a5a6; font-size: 12px; }
+    .preview { margin-bottom: 18px; }
+    .preview img {
+        max-width: 200px;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #eee;
+    }
+    .form-actions { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+    .btn-save {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+    }
+    .btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-cancel {
+        color: #7f8c8d;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    .alert-danger {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        padding: 24px;
+        border-radius: 10px;
+    }
+</style>
+
+@code {
+    private ProductForm model = new();
+    private string errorMessage = "";
+    private bool isSaving;
+
+    private bool IsSeller =>
+        AuthStateService.CurrentUser != null &&
+        (AuthStateService.CurrentUser.UserType is "Seller" or "Both" or "Admin");
+
+    private async Task Save()
+    {
+        errorMessage = "";
+        if (string.IsNullOrWhiteSpace(model.Name))
+        {
+            errorMessage = "Product name is required.";
+            return;
+        }
+        if (model.Price <= 0)
+        {
+            errorMessage = "Price must be greater than zero.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(model.Category))
+        {
+            errorMessage = "Please select a category.";
+            return;
+        }
+        if (model.Stock < 0)
+        {
+            errorMessage = "Stock cannot be negative.";
+            return;
+        }
+
+        isSaving = true;
+        var user = AuthStateService.CurrentUser!;
+        var sellerName = $"{user.FirstName} {user.LastName}".Trim();
+        if (string.IsNullOrWhiteSpace(sellerName))
+            sellerName = user.Email ?? "Seller";
+
+        var product = new Product
+        {
+            Name = model.Name.Trim(),
+            Price = model.Price,
+            Description = model.Description?.Trim(),
+            ImageUrl = string.IsNullOrWhiteSpace(model.ImageUrl) ? null : model.ImageUrl.Trim(),
+            Category = model.Category,
+            Stock = model.Stock,
+            SellerId = user.UserType == "Admin" ? user.Id : user.Id,
+            SellerName = sellerName,
+            Rating = 0,
+            IsActive = true
+        };
+
+        var created = await ProductService.CreateProductAsync(product);
+        isSaving = false;
+
+        if (created == null)
+        {
+            errorMessage = "Failed to save product. Please try again.";
+            return;
+        }
+
+        Navigation.NavigateTo("/seller/products");
+    }
+
+    private class ProductForm
+    {
+        public string? Name { get; set; }
+        public decimal Price { get; set; }
+        public int Stock { get; set; } = 1;
+        public string? Category { get; set; }
+        public string? Description { get; set; }
+        public string? ImageUrl { get; set; }
+    }
+}

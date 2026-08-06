@@ -9,21 +9,25 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Register database context
+// Register database context (connection string from appsettings)
 builder.Services.AddDbContext<ShopDbContext>(options =>
-    options.UseSqlite("Data Source=shop.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? "Data Source=shop.db"));
 
-// Register services - Use Singleton for AuthStateService
-builder.Services.AddSingleton<AuthStateService>();  // Changed from Scoped to Singleton
+// Register services
+builder.Services.AddSingleton<AuthStateService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<ProductService>();
 
 var app = builder.Build();
 
-// Seed the database
+// Apply migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
+    var db = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
+    await db.Database.MigrateAsync();
+
     var productService = scope.ServiceProvider.GetRequiredService<ProductService>();
     await productService.SeedProductsAsync();
 }
