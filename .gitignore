@@ -7,6 +7,10 @@
 *.user
 *.userosscache
 *.sln.docstates
+shop.db 
+shop.db-wal
+shop.db-shm
+.sqlite
 
 ## --------- Visual Studio & VS Code ---------
 .vs/
