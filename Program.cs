@@ -24,6 +24,10 @@ var app = builder.Build();
 // Seed the database
 using (var scope = app.Services.CreateScope())
 {
+    var db = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
+
+    await db.Database.MigrateAsync();
+
     var productService = scope.ServiceProvider.GetRequiredService<ProductService>();
     await productService.SeedProductsAsync();
 }
