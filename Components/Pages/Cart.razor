@@ -1,5 +1,6 @@
 @page "/cart"
 @inject CSE325_Team4_GroupProject.Services.CartService CartService
+@inject CSE325_Team4_GroupProject.Services.AuthStateService AuthStateService
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -28,7 +29,7 @@
                         }
                         <div class="item-details">
                             <h3>@item.Name</h3>
-                            <p>₦@item.Price.ToString("0.00")</p>
+                            <p>@CurrencyHelper.Format(item.Price, AuthStateService.CurrentUser?.Country)</p>
                             <div class="quantity-controls">
                                 <button @onclick="() => UpdateQuantity(item.ProductId, item.Quantity - 1)">-</button>
                                 <span>@item.Quantity</span>
@@ -36,7 +37,7 @@
                             </div>
                         </div>
                         <div class="item-actions">
-                            <p class="item-total">₦@((item.Price * item.Quantity).ToString("0.00"))</p>
+                            <p class="item-total">@CurrencyHelper.Format(item.Price * item.Quantity, AuthStateService.CurrentUser?.Country)</p>
                             <button class="remove-btn" @onclick="() => RemoveItem(item.ProductId)">Remove</button>
                         </div>
                     </div>
@@ -51,7 +52,7 @@
                 </div>
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>₦@CartService.TotalPrice.ToString("0.00")</span>
+                    <span>@CurrencyHelper.Format(CartService.TotalPrice, AuthStateService.CurrentUser?.Country)</span>
                 </div>
                 <button class="btn btn-primary checkout-btn" @onclick="GoToCheckout">Proceed to Checkout</button>
             </div>

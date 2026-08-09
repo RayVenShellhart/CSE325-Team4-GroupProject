@@ -132,6 +132,7 @@ public class ProductService
                 Email = "admin@shophub.com",
                 Password = "Admin123!",
                 UserType = "Admin",
+                Country = "NG",
                 IsActive = true,
                 CreatedAt = DateTime.Now
             };
@@ -143,6 +144,7 @@ public class ProductService
                 Email = "fashion@shophub.com",
                 Password = "Seller123!",
                 UserType = "Seller",
+                Country = "NG",
                 IsActive = true,
                 CreatedAt = DateTime.Now
             };
@@ -154,6 +156,7 @@ public class ProductService
                 Email = "tech@shophub.com",
                 Password = "Seller123!",
                 UserType = "Seller",
+                Country = "NG",
                 IsActive = true,
                 CreatedAt = DateTime.Now
             };
@@ -165,6 +168,7 @@ public class ProductService
                 Email = "furniture@shophub.com",
                 Password = "Seller123!",
                 UserType = "Seller",
+                Country = "NG",
                 IsActive = true,
                 CreatedAt = DateTime.Now
             };
@@ -176,6 +180,7 @@ public class ProductService
                 Email = "sport@shophub.com",
                 Password = "Seller123!",
                 UserType = "Seller",
+                Country = "NG",
                 IsActive = true,
                 CreatedAt = DateTime.Now
             };

@@ -69,6 +69,18 @@
                 <input type="text" id="address" class="form-control" placeholder="Enter your address" @bind="signupModel.Address" />
             </div>
 
+            <div class="form-group">
+                <label for="country">Country *</label>
+                <select id="country" class="form-control" @bind="signupModel.Country">
+                    <option value="">Select your country</option>
+                    @foreach (var c in CurrencyHelper.Countries)
+                    {
+                        <option value="@c.Code">@c.Name</option>
+                    }
+                </select>
+                <small style="color:#7f8c8d;font-size:12px;">Prices will be shown in your local currency.</small>
+            </div>
+
             <div class="form-group terms">
                 <input type="checkbox" id="terms" @bind="signupModel.AcceptTerms" />
                 <label for="terms">I agree to the <a href="/terms">Terms & Conditions</a> and <a href="/privacy">Privacy Policy</a></label>
@@ -323,6 +335,13 @@
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(signupModel.Country))
+        {
+            errorMessage = "Please select your country.";
+            isSigningUp = false;
+            return;
+        }
+
         var newUser = new User
         {
             FirstName = signupModel.FirstName,
@@ -332,6 +351,7 @@
             UserType = signupModel.UserType,
             PhoneNumber = signupModel.PhoneNumber,
             Address = signupModel.Address,
+            Country = signupModel.Country,
             CreatedAt = DateTime.Now
         };
 
@@ -366,6 +386,7 @@
         public string? UserType { get; set; } = "Buyer";
         public string? PhoneNumber { get; set; }
         public string? Address { get; set; }
+        public string? Country { get; set; }
         public bool AcceptTerms { get; set; }
     }
 }

@@ -76,7 +76,7 @@ else
                                     <div class="muted">⭐ @p.Rating.ToString("0.0")</div>
                                 </td>
                                 <td>@p.Category</td>
-                                <td>₦@p.Price.ToString("N2")</td>
+                                <td>@CurrencyHelper.Format(p.Price, AuthStateService.CurrentUser?.Country)</td>
                                 <td>@p.Stock</td>
                                 <td>
                                     <span class="badge @(p.IsActive ? "badge-active" : "badge-inactive")">

@@ -34,7 +34,7 @@ else
                         <h2>@user.FirstName @user.LastName</h2>
                         @if (IsSellerOrAdmin)
                         {
-                            <a href="/seller/products" class="my-products-link">My Products</a>
+                            <a href="/seller/products" class="my-products-link">My Products →</a>
                         }
                     </div>
                     <span class="role-badge">@user.UserType</span>
@@ -69,6 +69,17 @@ else
                 <div class="form-group full">
                     <label>Address</label>
                     <input class="form-control" @bind="user.Address" />
+                </div>
+                <div class="form-group full">
+                    <label>Country</label>
+                    <select class="form-control" @bind="user.Country">
+                        <option value="">Select your country</option>
+                        @foreach (var c in CurrencyHelper.Countries)
+                        {
+                            <option value="@c.Code">@c.Name</option>
+                        }
+                    </select>
+                    <small class="hint">Prices are shown in your country's currency (@currencyLabel).</small>
                 </div>
                 <div class="form-group full">
                     <label>New Password (leave blank to keep current)</label>
@@ -223,6 +234,15 @@ else
     private bool IsSellerOrAdmin =>
         user.UserType is "Seller" or "Both" or "Admin";
 
+    private string currencyLabel
+    {
+        get
+        {
+            var c = CurrencyHelper.GetCurrency(user.Country);
+            return $"{c.Code} ({c.Symbol})";
+        }
+    }
+
     private string Initials
     {
         get
@@ -249,6 +269,7 @@ else
                 PhoneNumber = c.PhoneNumber,
                 Address = c.Address,
                 ProfileImage = c.ProfileImage,
+                Country = c.Country,
                 UserType = c.UserType,
                 IsActive = c.IsActive,
                 CreatedAt = c.CreatedAt,
@@ -271,6 +292,12 @@ else
         if (string.IsNullOrWhiteSpace(user.Email))
         {
             statusMessage = "Email is required.";
+            isError = true;
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(user.Country))
+        {
+            statusMessage = "Please select your country.";
             isError = true;
             return;
         }

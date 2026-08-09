@@ -14,6 +14,10 @@ public class User
     public string? PhoneNumber { get; set; }
     public string? Address { get; set; }
     public string? ProfileImage { get; set; }
+    /// <summary>
+    /// ISO-style country code used for currency, e.g. "NG", "US", "GB".
+    /// </summary>
+    public string? Country { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 

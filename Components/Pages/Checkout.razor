@@ -92,7 +92,7 @@
                             <p><strong>Bank:</strong> ShopHub Demo Bank</p>
                             <p><strong>Account name:</strong> ShopHub Marketplace Ltd</p>
                             <p><strong>Account number:</strong> 0123456789</p>
-                            <p><strong>Amount:</strong> ₦@Cart.TotalPrice.ToString("N2")</p>
+                            <p><strong>Amount:</strong> @CurrencyHelper.Format(Cart.TotalPrice, AuthStateService.CurrentUser?.Country)</p>
                         </div>
                         <label>Your transfer reference / receipt number *</label>
                         <input @bind="transferReference" placeholder="e.g. TXN123456 or receipt no." />
@@ -154,12 +154,12 @@
                 {
                     <div class="summary-item">
                         <span>@item.Name x @item.Quantity</span>
-                        <span>₦@((item.Price * item.Quantity).ToString("N2"))</span>
+                        <span>@CurrencyHelper.Format(item.Price * item.Quantity, AuthStateService.CurrentUser?.Country)</span>
                     </div>
                 }
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>₦@Cart.TotalPrice.ToString("N2")</span>
+                    <span>@CurrencyHelper.Format(Cart.TotalPrice, AuthStateService.CurrentUser?.Country)</span>
                 </div>
                 <div class="summary-payment">
                     Payment: @PaymentMethodLabel
@@ -351,14 +351,21 @@
         _ => paymentMethod
     };
 
-    private string PlaceOrderButtonText => paymentMethod switch
+    private string PlaceOrderButtonText
     {
-        "Card" => $"Pay ₦{Cart.TotalPrice:N2} with Card",
-        "BankTransfer" => "Confirm Bank Transfer",
-        "MobileMoney" => $"Pay ₦{Cart.TotalPrice:N2} with Mobile Money",
-        "CashOnDelivery" => "Place Order (Cash on Delivery)",
-        _ => "Place Order"
-    };
+        get
+        {
+            var total = CurrencyHelper.Format(Cart.TotalPrice, AuthStateService.CurrentUser?.Country);
+            return paymentMethod switch
+            {
+                "Card" => $"Pay {total} with Card",
+                "BankTransfer" => "Confirm Bank Transfer",
+                "MobileMoney" => $"Pay {total} with Mobile Money",
+                "CashOnDelivery" => "Place Order (Cash on Delivery)",
+                _ => "Place Order"
+            };
+        }
+    }
 
     protected override void OnInitialized()
     {

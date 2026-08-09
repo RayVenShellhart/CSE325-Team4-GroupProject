@@ -42,7 +42,7 @@ else
                     <span class="rating-num">@product.Rating.ToString("0.0")</span>
                     <span class="review-count">(@reviews.Count review@(reviews.Count == 1 ? "" : "s"))</span>
                 </div>
-                <p class="price">₦@product.Price.ToString("N2")</p>
+                <p class="price">@CurrencyHelper.Format(product.Price, AuthStateService.CurrentUser?.Country)</p>
                 <p class="meta"><strong>Category:</strong> @product.Category</p>
                 <p class="meta"><strong>Seller:</strong> @(product.SellerName ?? "Unknown")</p>
                 <p class="meta"><strong>Stock:</strong> @(product.Stock > 0 ? product.Stock.ToString() : "Out of stock")</p>

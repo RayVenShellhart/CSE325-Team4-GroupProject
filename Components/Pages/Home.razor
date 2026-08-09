@@ -2,6 +2,7 @@
 @using CSE325_Team4_GroupProject.Models
 @using CSE325_Team4_GroupProject.Services
 @inject ProductService ProductService
+@inject AuthStateService AuthStateService
 
 <PageTitle>ShopHub - Home</PageTitle>
 
@@ -58,29 +59,29 @@
             <div class="deal-card">
                 <span class="deal-badge">-20%</span>
                 <h3>Wireless Earbuds</h3>
-                <p class="old-price">₦25,000</p>
-                <p class="deal-price">₦20,000</p>
+                <p class="old-price">@CurrencyHelper.Format(25m, UserCountry)</p>
+                <p class="deal-price">@CurrencyHelper.Format(20m, UserCountry)</p>
                 <button class="btn-deal">Shop Now</button>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-15%</span>
                 <h3>Smart Watch</h3>
-                <p class="old-price">₦50,000</p>
-                <p class="deal-price">₦42,500</p>
+                <p class="old-price">@CurrencyHelper.Format(50m, UserCountry)</p>
+                <p class="deal-price">@CurrencyHelper.Format(42.50m, UserCountry)</p>
                 <button class="btn-deal">Shop Now</button>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-30%</span>
                 <h3>Running Shoes</h3>
-                <p class="old-price">₦35,000</p>
-                <p class="deal-price">₦24,500</p>
+                <p class="old-price">@CurrencyHelper.Format(35m, UserCountry)</p>
+                <p class="deal-price">@CurrencyHelper.Format(24.50m, UserCountry)</p>
                 <button class="btn-deal">Shop Now</button>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-10%</span>
                 <h3>Laptop Bag</h3>
-                <p class="old-price">₦15,000</p>
-                <p class="deal-price">₦13,500</p>
+                <p class="old-price">@CurrencyHelper.Format(15m, UserCountry)</p>
+                <p class="deal-price">@CurrencyHelper.Format(13.50m, UserCountry)</p>
                 <button class="btn-deal">Shop Now</button>
             </div>
         </div>
@@ -373,6 +374,8 @@
 </style>
 
 @code {
+    private string? UserCountry => AuthStateService.CurrentUser?.Country;
+
     private List<Product> featuredProducts = new();
     private bool isLoading = true;
 

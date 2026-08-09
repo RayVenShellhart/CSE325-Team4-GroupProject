@@ -22,7 +22,7 @@
                         <a href="/profile" class="user-greeting">👋 @AuthStateService.CurrentUser.FirstName</a>
                         @if (IsAdmin)
                         {
-                            <a href="/admin">Admin</a>
+                            <a href="/admin">Dashboard</a>
                         }
                         <a href="#" @onclick="Logout" @onclick:preventDefault="true">Logout</a>
                     }

@@ -93,6 +93,7 @@ public class UserService
         existing.PhoneNumber = user.PhoneNumber;
         existing.Address = user.Address;
         existing.ProfileImage = user.ProfileImage;
+        existing.Country = user.Country;
         existing.UserType = user.UserType;
         existing.IsActive = user.IsActive;
 
