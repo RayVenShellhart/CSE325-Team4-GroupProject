@@ -26,6 +26,9 @@ var app = builder.Build();
 // Apply migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
+    var db = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
+    await db.Database.MigrateAsync();
+
     var productService = scope.ServiceProvider.GetRequiredService<ProductService>();
     await productService.SeedProductsAsync();
 }
