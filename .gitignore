@@ -7,18 +7,10 @@
 *.user
 *.userosscache
 *.sln.docstates
-<<<<<<< HEAD
-<<<<<<< HEAD
 shop.db 
 shop.db-wal
 shop.db-shm
 .sqlite
-=======
-shop.db
->>>>>>> f8f652b (ss)
-=======
-shop.db
->>>>>>> f8f652bdad5d4cf03d765b352f12f6329931d8fd
 
 ## --------- Visual Studio & VS Code ---------
 .vs/

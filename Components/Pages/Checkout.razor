@@ -68,9 +68,9 @@
 </style>
 
 @code {
-    private void PlaceOrder()
+    private async Task PlaceOrder()
     {
-        Cart.Clear();
+        await Cart.Clear();
         Navigation.NavigateTo("/");
     }
 }

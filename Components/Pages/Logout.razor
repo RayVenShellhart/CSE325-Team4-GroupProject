@@ -1,10 +1,11 @@
 @page "/logout"
+@inject AuthStateService AuthStateService
 @inject NavigationManager NavigationManager
 
 @code {
     protected override void OnInitialized()
     {
-        // Clear user session
+        AuthStateService.Logout();
         NavigationManager.NavigateTo("/", true);
     }
 }
