@@ -1,0 +1,153 @@
+@page "/admin"
+@using CSE325_Team4_GroupProject.Models
+@using CSE325_Team4_GroupProject.Services
+@inject AuthStateService AuthStateService
+@inject UserService UserService
+@inject ProductService ProductService
+@inject NavigationManager Navigation
+
+<PageTitle>ShopHub - Admin Dashboard</PageTitle>
+
+@if (!IsAdmin)
+{
+    <div class="alert alert-warning">
+        <h3>Access denied</h3>
+        <p>Admin privileges are required.</p>
+        <a href="/login">Login</a>
+    </div>
+}
+else
+{
+    <div class="admin-page">
+        <div class="page-header">
+            <div>
+                <h1>🛠️ Admin Dashboard</h1>
+                <p class="subtitle">Manage users, sellers, and store overview</p>
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">@totalUsers</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">@sellerCount</div>
+                    <div class="stat-label">Sellers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">@buyerCount</div>
+                    <div class="stat-label">Buyers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">@activeUsers</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">@totalProducts</div>
+                    <div class="stat-label">Products</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">@activeProducts</div>
+                    <div class="stat-label">Active Products</div>
+                </div>
+            </div>
+
+            <div class="quick-links">
+                <a href="/admin/users" class="quick-card">
+                    <span class="icon">👥</span>
+                    <h3>Manage Users</h3>
+                    <p>View, activate/deactivate, and change roles</p>
+                </a>
+                <a href="/seller/products" class="quick-card">
+                    <span class="icon">📦</span>
+                    <h3>All Products</h3>
+                    <p>View and manage product listings</p>
+                </a>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .admin-page { padding: 10px 0 40px; }
+    .page-header h1 { margin: 0 0 4px; color: #2c3e50; font-size: 28px; }
+    .subtitle { margin: 0 0 24px; color: #7f8c8d; font-size: 14px; }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        text-align: center;
+    }
+    .stat-value { font-size: 32px; font-weight: 700; color: #2c3e50; }
+    .stat-label { font-size: 13px; color: #7f8c8d; margin-top: 4px; }
+    .quick-links {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+    }
+    .quick-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .quick-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    .quick-card .icon { font-size: 28px; }
+    .quick-card h3 { margin: 10px 0 6px; color: #2c3e50; font-size: 18px; }
+    .quick-card p { margin: 0; color: #7f8c8d; font-size: 14px; }
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        padding: 24px;
+        border-radius: 10px;
+    }
+</style>
+
+@code {
+    private bool isLoading = true;
+    private int totalUsers, sellerCount, buyerCount, activeUsers, totalProducts, activeProducts;
+
+    private bool IsAdmin =>
+        AuthStateService.CurrentUser?.UserType == "Admin";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsAdmin)
+        {
+            isLoading = false;
+            return;
+        }
+
+        var users = await UserService.GetAllUsersAsync();
+        totalUsers = users.Count;
+        sellerCount = users.Count(u => u.UserType is "Seller" or "Both");
+        buyerCount = users.Count(u => u.UserType is "Buyer" or "Both");
+        activeUsers = users.Count(u => u.IsActive);
+
+        var products = await ProductService.GetAllProductsIncludingInactiveAsync();
+        totalProducts = products.Count;
+        activeProducts = products.Count(p => p.IsActive);
+
+        isLoading = false;
+    }
+}

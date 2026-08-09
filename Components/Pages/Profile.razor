@@ -30,7 +30,13 @@ else
             <div class="profile-header">
                 <div class="avatar">@(Initials)</div>
                 <div>
-                    <h2>@user.FirstName @user.LastName</h2>
+                    <div class="name-row">
+                        <h2>@user.FirstName @user.LastName</h2>
+                        @if (IsSellerOrAdmin)
+                        {
+                            <a href="/seller/products" class="my-products-link">My Products</a>
+                        }
+                    </div>
                     <span class="role-badge">@user.UserType</span>
                     <span class="status-badge @(user.IsActive ? "active" : "inactive")">
                         @(user.IsActive ? "Active" : "Inactive")
@@ -74,10 +80,6 @@ else
                 <button class="btn-save" @onclick="SaveProfile" disabled="@isSaving">
                     @(isSaving ? "Saving..." : "Save Changes")
                 </button>
-                @if (IsSellerOrAdmin)
-                {
-                    <a href="/seller/products" class="btn-link">My Products →</a>
-                }
             </div>
 
             <p class="meta">Member since @user.CreatedAt.ToString("MMM d, yyyy")</p>
@@ -114,7 +116,21 @@ else
         font-size: 22px;
         font-weight: 700;
     }
-    .profile-header h2 { margin: 0 0 6px; font-size: 22px; color: #2c3e50; }
+    .name-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 6px;
+    }
+    .profile-header h2 { margin: 0; font-size: 22px; color: #2c3e50; }
+    .my-products-link {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .my-products-link:hover { text-decoration: underline; }
     .role-badge {
         background: #eaf2f8;
         color: #2980b9;
