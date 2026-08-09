@@ -30,8 +30,22 @@
                 <label>Address *</label>
                 <input @bind="address" placeholder="Street address" />
 
-                <label>City *</label>
-                <input @bind="city" placeholder="City" />
+                <div class="row-2">
+                    <div>
+                        <label>City *</label>
+                        <input @bind="city" placeholder="City" />
+                    </div>
+                    <div>
+                        <label>Country *</label>
+                        <select @bind="country" @bind:after="OnCountryChanged">
+                            <option value="">Select country</option>
+                            @foreach (var c in CurrencyHelper.Countries)
+                            {
+                                <option value="@c.Code">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
 
                 <label>Phone *</label>
                 <input @bind="phone" placeholder="Phone number" />
@@ -39,93 +53,93 @@
                 <h2 class="section-title">Payment Method *</h2>
                 <div class="payment-options">
                     <label class="payment-option @(paymentMethod == "Card" ? "selected" : "")">
-                        <input type="radio" name="payment" value="Card" checked="@(paymentMethod == "Card")" @onchange="OnPaymentChanged" />
+                        <input type="radio" name="payment" value="Card" @onchange="OnPaymentChanged" checked="@(paymentMethod == "Card")" />
                         <span class="option-icon">💳</span>
-                        <span>Debit / Credit Card</span>
-                    </label>
-                    <label class="payment-option @(paymentMethod == "BankTransfer" ? "selected" : "")">
-                        <input type="radio" name="payment" value="BankTransfer" checked="@(paymentMethod == "BankTransfer")" @onchange="OnPaymentChanged" />
-                        <span class="option-icon">🏦</span>
-                        <span>Bank Transfer</span>
+                        <span>Card</span>
                     </label>
                     <label class="payment-option @(paymentMethod == "MobileMoney" ? "selected" : "")">
-                        <input type="radio" name="payment" value="MobileMoney" checked="@(paymentMethod == "MobileMoney")" @onchange="OnPaymentChanged" />
+                        <input type="radio" name="payment" value="MobileMoney" @onchange="OnPaymentChanged" checked="@(paymentMethod == "MobileMoney")" />
                         <span class="option-icon">📱</span>
                         <span>Mobile Money</span>
                     </label>
+                    <label class="payment-option @(paymentMethod == "BankTransfer" ? "selected" : "")">
+                        <input type="radio" name="payment" value="BankTransfer" @onchange="OnPaymentChanged" checked="@(paymentMethod == "BankTransfer")" />
+                        <span class="option-icon">🏦</span>
+                        <span>Bank Transfer</span>
+                    </label>
                     <label class="payment-option @(paymentMethod == "CashOnDelivery" ? "selected" : "")">
-                        <input type="radio" name="payment" value="CashOnDelivery" checked="@(paymentMethod == "CashOnDelivery")" @onchange="OnPaymentChanged" />
+                        <input type="radio" name="payment" value="CashOnDelivery" @onchange="OnPaymentChanged" checked="@(paymentMethod == "CashOnDelivery")" />
                         <span class="option-icon">💵</span>
                         <span>Cash on Delivery</span>
                     </label>
                 </div>
 
-                @* ---- Dynamic payment detail fields ---- *@
                 @if (paymentMethod == "Card")
                 {
                     <div class="payment-details">
-                        <h3>Card details</h3>
-                        <label>Name on card *</label>
-                        <input @bind="cardName" placeholder="Name as on card" />
+                        <h3>Card Details</h3>
+                        <label>Cardholder Name *</label>
+                        <input @bind="cardName" placeholder="Name on card" />
 
-                        <label>Card number *</label>
-                        <input @bind="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" />
+                        <label>Card Number *</label>
+                        <input @bind="cardNumber" placeholder="ACCT-000035" maxlength="19" />
 
-                        <div class="field-row">
-                            <div class="field-half">
+                        <div class="row-2">
+                            <div>
                                 <label>Expiry (MM/YY) *</label>
                                 <input @bind="cardExpiry" placeholder="MM/YY" maxlength="5" />
                             </div>
-                            <div class="field-half">
+                            <div>
                                 <label>CVV *</label>
-                                <input @bind="cardCvv" type="password" placeholder="123" maxlength="4" />
+                                <input @bind="cardCvv" placeholder="123" maxlength="4" type="password" />
                             </div>
                         </div>
-                        <p class="hint">Demo only — card details are not stored or charged in this project.</p>
-                    </div>
-                }
-                else if (paymentMethod == "BankTransfer")
-                {
-                    <div class="payment-details">
-                        <h3>Bank transfer</h3>
-                        <div class="bank-info">
-                            <p><strong>Bank:</strong> ShopHub Demo Bank</p>
-                            <p><strong>Account name:</strong> ShopHub Marketplace Ltd</p>
-                            <p><strong>Account number:</strong> 0123456789</p>
-                            <p><strong>Amount:</strong> @CurrencyHelper.Format(Cart.TotalPrice, AuthStateService.CurrentUser?.Country)</p>
-                        </div>
-                        <label>Your transfer reference / receipt number *</label>
-                        <input @bind="transferReference" placeholder="e.g. TXN123456 or receipt no." />
-                        <label>Bank you transferred from (optional)</label>
-                        <input @bind="transferFromBank" placeholder="e.g. GTBank, Access, Zenith" />
-                        <p class="hint">Use your order email or phone as the transfer narration if possible.</p>
+                        <p class="hint">Demo only — card details are not stored or charged.</p>
                     </div>
                 }
                 else if (paymentMethod == "MobileMoney")
                 {
                     <div class="payment-details">
-                        <h3>Mobile money</h3>
-                        <label>Network *</label>
-                        <select @bind="momoNetwork">
-                            <option value="">Select network</option>
+                        <h3>Mobile Money Details</h3>
+                        <label>Provider *</label>
+                        <select @bind="mobileProvider">
+                            <option value="">Select provider</option>
                             <option value="MTN">MTN MoMo</option>
                             <option value="Airtel">Airtel Money</option>
                             <option value="Glo">Glo</option>
                             <option value="9mobile">9mobile</option>
-                            <option value="Other">Other</option>
                         </select>
-                        <label>Mobile money phone number *</label>
-                        <input @bind="momoPhone" placeholder="e.g. 08012345678" />
-                        <p class="hint">You may receive a prompt on your phone to approve the payment (demo flow).</p>
+
+                        <label>Mobile Number *</label>
+                        <input @bind="mobileNumber" placeholder="e.g. 08012345678" />
+                    </div>
+                }
+                else if (paymentMethod == "BankTransfer")
+                {
+                    <div class="payment-details">
+                        <h3>Bank Transfer Details</h3>
+                        <div class="bank-info">
+                            <p><strong>Bank:</strong> ShopHub Bank</p>
+                            <p><strong>Account Name:</strong> ShopHub Ltd</p>
+                            <p><strong>Account Number:</strong> 0123456789</p>
+                            <p><strong>Amount:</strong> @CurrencyHelper.Format(Cart.TotalPrice, country)</p>
+                            <p class="hint">Transfer the total amount, then enter your reference below.</p>
+                        </div>
+
+                        <label>Your Bank Name *</label>
+                        <input @bind="bankName" placeholder="Bank you transferred from" />
+
+                        <label>Transfer Reference / Narration *</label>
+                        <input @bind="transferReference" placeholder="Reference or transaction ID" />
                     </div>
                 }
                 else if (paymentMethod == "CashOnDelivery")
                 {
                     <div class="payment-details">
-                        <h3>Cash on delivery</h3>
+                        <h3>Cash on Delivery</h3>
                         <p class="cod-note">
                             Pay with cash when your order is delivered.
-                            Please ensure someone is available at the shipping address to receive the order.
+                            Please ensure someone is available at the shipping address to receive the package and make payment.
                         </p>
                         <label class="checkbox-row">
                             <input type="checkbox" @bind="codConfirmed" />
@@ -154,15 +168,16 @@
                 {
                     <div class="summary-item">
                         <span>@item.Name x @item.Quantity</span>
-                        <span>@CurrencyHelper.Format(item.Price * item.Quantity, AuthStateService.CurrentUser?.Country)</span>
+                        <span>@CurrencyHelper.Format(item.Price * item.Quantity, country)</span>
                     </div>
                 }
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>@CurrencyHelper.Format(Cart.TotalPrice, AuthStateService.CurrentUser?.Country)</span>
+                    <span>@CurrencyHelper.Format(Cart.TotalPrice, country)</span>
                 </div>
                 <div class="summary-payment">
-                    Payment: @PaymentMethodLabel
+                    <div>Currency: @CurrencyHelper.CurrencyLabel(country)</div>
+                    <div>Payment: @PaymentLabel</div>
                 </div>
             </div>
         </div>
@@ -187,7 +202,8 @@
         margin-bottom: 5px;
         color: #2c3e50;
     }
-    .checkout-form input, .checkout-form select {
+    .checkout-form input,
+    .checkout-form select {
         display: block;
         width: 100%;
         padding: 10px 12px;
@@ -198,24 +214,23 @@
         box-sizing: border-box;
         background: white;
     }
-    .checkout-form input:focus, .checkout-form select:focus {
+    .checkout-form input:focus,
+    .checkout-form select:focus {
         border-color: #3498db;
         outline: none;
         box-shadow: 0 0 0 3px rgba(52,152,219,0.12);
     }
-    .field-row { display: flex; gap: 12px; }
-    .field-half { flex: 1; }
     .payment-options {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
         margin-bottom: 18px;
     }
     .payment-option {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 14px 16px;
+        gap: 8px;
+        padding: 12px 14px;
         border: 2px solid #e0e0e0;
         border-radius: 8px;
         cursor: pointer;
@@ -223,8 +238,9 @@
         font-size: 14px;
         color: #2c3e50;
         transition: border-color 0.15s, background 0.15s;
+        margin: 0;
     }
-    .payment-option input { width: auto; margin: 0; }
+    .payment-option input { width: auto; margin: 0; flex-shrink: 0; }
     .payment-option.selected {
         border-color: #3498db;
         background: #eaf4fc;
@@ -236,26 +252,37 @@
         border-radius: 8px;
         margin-bottom: 16px;
     }
-    .payment-details h3 { margin: 0 0 12px; font-size: 16px; color: #2c3e50; }
-    .bank-info {
-        background: white;
-        border: 1px dashed #bdc3c7;
-        border-radius: 6px;
-        padding: 12px 14px;
-        margin-bottom: 14px;
-        font-size: 14px;
+    .payment-details h3 {
+        margin: 0 0 14px;
+        font-size: 16px;
         color: #2c3e50;
     }
-    .bank-info p { margin: 4px 0; }
-    .cod-note { color: #555; font-size: 14px; line-height: 1.5; margin: 0 0 12px; }
-    .hint { color: #95a5a6; font-size: 12px; margin: -6px 0 10px; }
+    .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .bank-info {
+        background: white;
+        padding: 12px 14px;
+        border-radius: 6px;
+        margin-bottom: 14px;
+        border-left: 4px solid #3498db;
+    }
+    .bank-info p { margin: 4px 0; font-size: 14px; color: #555; }
+    .hint { color: #7f8c8d !important; font-size: 13px !important; margin-top: 8px !important; }
+    .cod-note {
+        color: #555;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0 0 14px;
+    }
     .checkbox-row {
         display: flex !important;
         align-items: center;
         gap: 10px;
         font-weight: 500 !important;
         cursor: pointer;
-        margin-bottom: 0 !important;
     }
     .checkbox-row input { width: auto !important; margin: 0 !important; }
     .place-order-btn {
@@ -285,6 +312,7 @@
         justify-content: space-between;
         margin-bottom: 10px;
         font-size: 14px;
+        gap: 12px;
     }
     .summary-row.total {
         font-weight: bold;
@@ -293,22 +321,38 @@
         padding-top: 12px;
         border-top: 1px solid #ddd;
     }
-    .summary-payment { margin-top: 12px; font-size: 13px; color: #7f8c8d; }
+    .summary-payment {
+        margin-top: 12px;
+        font-size: 13px;
+        color: #7f8c8d;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
     .empty-cart { text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; }
     .btn { padding: 10px 18px; text-decoration: none; display: inline-block; }
     .btn-primary { background: #f1c40f; color: #2c3e50; border: none; border-radius: 5px; cursor: pointer; }
     .error-msg {
-        background: #f8d7da; color: #721c24;
-        padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px;
+        background: #f8d7da;
+        color: #721c24;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        font-size: 14px;
     }
     .success-msg {
-        background: #d4edda; color: #155724;
-        padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px;
+        background: #d4edda;
+        color: #155724;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        font-size: 14px;
     }
     @@media (max-width: 900px) {
         .checkout-layout { grid-template-columns: 1fr; }
+        .payment-options { grid-template-columns: 1fr; }
+        .row-2 { grid-template-columns: 1fr; }
         .summary-card { position: static; }
-        .field-row { flex-direction: column; gap: 0; }
     }
 </style>
 
@@ -317,36 +361,32 @@
     private string email = "";
     private string address = "";
     private string city = "";
+    private string country = "";
     private string phone = "";
-
     private string paymentMethod = "Card";
 
-    // Card
     private string cardName = "";
     private string cardNumber = "";
     private string cardExpiry = "";
     private string cardCvv = "";
 
-    // Bank transfer
+    private string mobileProvider = "";
+    private string mobileNumber = "";
+
+    private string bankName = "";
     private string transferReference = "";
-    private string transferFromBank = "";
 
-    // Mobile money
-    private string momoNetwork = "";
-    private string momoPhone = "";
-
-    // COD
     private bool codConfirmed;
 
     private string errorMessage = "";
     private string successMessage = "";
     private bool isPlacing;
 
-    private string PaymentMethodLabel => paymentMethod switch
+    private string PaymentLabel => paymentMethod switch
     {
-        "Card" => "Debit / Credit Card",
-        "BankTransfer" => "Bank Transfer",
+        "Card" => "Card",
         "MobileMoney" => "Mobile Money",
+        "BankTransfer" => "Bank Transfer",
         "CashOnDelivery" => "Cash on Delivery",
         _ => paymentMethod
     };
@@ -355,12 +395,12 @@
     {
         get
         {
-            var total = CurrencyHelper.Format(Cart.TotalPrice, AuthStateService.CurrentUser?.Country);
+            var total = CurrencyHelper.Format(Cart.TotalPrice, country);
             return paymentMethod switch
             {
                 "Card" => $"Pay {total} with Card",
-                "BankTransfer" => "Confirm Bank Transfer",
                 "MobileMoney" => $"Pay {total} with Mobile Money",
+                "BankTransfer" => "Confirm Bank Transfer",
                 "CashOnDelivery" => "Place Order (Cash on Delivery)",
                 _ => "Place Order"
             };
@@ -376,15 +416,22 @@
             email = user.Email ?? "";
             phone = user.PhoneNumber ?? "";
             address = user.Address ?? "";
-            momoPhone = user.PhoneNumber ?? "";
+            country = user.Country ?? "";
+            mobileNumber = user.PhoneNumber ?? "";
         }
+        if (string.IsNullOrWhiteSpace(country))
+            country = "US";
+    }
+
+    private void OnCountryChanged()
+    {
+        errorMessage = "";
     }
 
     private void OnPaymentChanged(ChangeEventArgs e)
     {
         paymentMethod = e.Value?.ToString() ?? "Card";
         errorMessage = "";
-        successMessage = "";
     }
 
     private async Task PlaceOrder()
@@ -402,79 +449,59 @@
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(country))
+        {
+            errorMessage = "Please select your country.";
+            return;
+        }
+
         if (!email.Contains('@'))
         {
             errorMessage = "Please enter a valid email address.";
             return;
         }
 
-        if (!ValidatePaymentDetails())
-            return;
+        if (paymentMethod == "Card")
+        {
+            if (string.IsNullOrWhiteSpace(cardName) ||
+                string.IsNullOrWhiteSpace(cardNumber) ||
+                string.IsNullOrWhiteSpace(cardExpiry) ||
+                string.IsNullOrWhiteSpace(cardCvv))
+            {
+                errorMessage = "Please complete all card details.";
+                return;
+            }
+        }
+        else if (paymentMethod == "MobileMoney")
+        {
+            if (string.IsNullOrWhiteSpace(mobileProvider) || string.IsNullOrWhiteSpace(mobileNumber))
+            {
+                errorMessage = "Please select a provider and enter your mobile number.";
+                return;
+            }
+        }
+        else if (paymentMethod == "BankTransfer")
+        {
+            if (string.IsNullOrWhiteSpace(bankName) || string.IsNullOrWhiteSpace(transferReference))
+            {
+                errorMessage = "Please enter your bank name and transfer reference.";
+                return;
+            }
+        }
+        else if (paymentMethod == "CashOnDelivery")
+        {
+            if (!codConfirmed)
+            {
+                errorMessage = "Please confirm you will pay cash on delivery.";
+                return;
+            }
+        }
 
         isPlacing = true;
-        successMessage = $"Order placed successfully via {PaymentMethodLabel}!";
-        await Task.Delay(700);
+        successMessage = $"Order placed successfully via {PaymentLabel}!";
+        await Task.Delay(800);
         await Cart.Clear();
         isPlacing = false;
         Navigation.NavigateTo("/");
-    }
-
-    private bool ValidatePaymentDetails()
-    {
-        switch (paymentMethod)
-        {
-            case "Card":
-                if (string.IsNullOrWhiteSpace(cardName) ||
-                    string.IsNullOrWhiteSpace(cardNumber) ||
-                    string.IsNullOrWhiteSpace(cardExpiry) ||
-                    string.IsNullOrWhiteSpace(cardCvv))
-                {
-                    errorMessage = "Please complete all card details.";
-                    return false;
-                }
-                var digits = new string(cardNumber.Where(char.IsDigit).ToArray());
-                if (digits.Length < 13 || digits.Length > 19)
-                {
-                    errorMessage = "Enter a valid card number.";
-                    return false;
-                }
-                if (cardCvv.Length < 3)
-                {
-                    errorMessage = "Enter a valid CVV.";
-                    return false;
-                }
-                break;
-
-            case "BankTransfer":
-                if (string.IsNullOrWhiteSpace(transferReference))
-                {
-                    errorMessage = "Please enter your transfer reference or receipt number.";
-                    return false;
-                }
-                break;
-
-            case "MobileMoney":
-                if (string.IsNullOrWhiteSpace(momoNetwork))
-                {
-                    errorMessage = "Please select a mobile money network.";
-                    return false;
-                }
-                if (string.IsNullOrWhiteSpace(momoPhone) || momoPhone.Trim().Length < 10)
-                {
-                    errorMessage = "Please enter a valid mobile money phone number.";
-                    return false;
-                }
-                break;
-
-            case "CashOnDelivery":
-                if (!codConfirmed)
-                {
-                    errorMessage = "Please confirm you will pay cash on delivery.";
-                    return false;
-                }
-                break;
-        }
-
-        return true;
     }
 }
