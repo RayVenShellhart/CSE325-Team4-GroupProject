@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CSE325_Team4_GroupProject.Services;
 
+/// <summary>
+/// Data access for products: querying, seeding, and full CRUD operations.
+/// </summary>
 public class ProductService
 {
     private readonly ShopDbContext _context;
@@ -34,6 +37,48 @@ public class ProductService
             .OrderByDescending(p => p.Rating)
             .Take(3)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Product> CreateProductAsync(Product product, CancellationToken cancellationToken = default)
+    {
+        _context.Products.Add(product);
+        await _context.SaveChangesAsync(cancellationToken);
+        return product;
+    }
+
+    public async Task<Product?> UpdateProductAsync(Product product, CancellationToken cancellationToken = default)
+    {
+        var existing = await _context.Products.FirstOrDefaultAsync(p => p.Id == product.Id, cancellationToken);
+
+        if (existing == null)
+        {
+            return null;
+        }
+
+        existing.Name = product.Name;
+        existing.Price = product.Price;
+        existing.Description = product.Description;
+        existing.ImageUrl = product.ImageUrl;
+        existing.Rating = product.Rating;
+        existing.SellerName = product.SellerName;
+        existing.Category = product.Category;
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return existing;
+    }
+
+    public async Task<bool> DeleteProductAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+        if (product == null)
+        {
+            return false;
+        }
+
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public async Task SeedProductsAsync(CancellationToken cancellationToken = default)
