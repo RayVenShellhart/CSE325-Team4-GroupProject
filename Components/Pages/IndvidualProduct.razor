@@ -2,6 +2,8 @@
 
 @using CSE325_Team4_GroupProject.Models
 @inject CSE325_Team4_GroupProject.Services.ProductService ProductService
+@inject CSE325_Team4_GroupProject.Services.CartService Cart
+@inject NavigationManager Navigation
 
 <PageTitle>ShopHub - Product</PageTitle>
 
@@ -20,7 +22,7 @@ else {
             <p>Seller: @product.SellerName</p>
             <p>@product.Description</p>
 
-            <button>Add to Cart</button>
+            <button class="btn-add-cart" @onclick="AddToCart" disabled="@(isAdding)">@(isAdding ? "Adding..." : addedMessage)</button>
         </div>
     </div>
 }
@@ -56,6 +58,21 @@ else {
         margin-top: 25px;
         padding: 12px 24px;
         cursor: pointer;
+        border: none;
+        border-radius: 6px;
+        background: #f1c40f;
+        color: #2c3e50;
+        font-weight: bold;
+        font-size: 15px;
+    }
+
+    .product-info button:hover:not(:disabled) {
+        background: #f39c12;
+    }
+
+    .product-info button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 </style>
 
@@ -66,8 +83,24 @@ else {
     public int Id { get; set; }
 
     private Product? product;
+    private bool isAdding;
+    private string addedMessage = "Add to Cart";
 
+    // Reload the product whenever the page route (Id) changes.
     protected override async Task OnParametersSetAsync() {
         product = await ProductService.GetProductByIdAsync(Id);
+        addedMessage = "Add to Cart";
+    }
+
+    // Adds the product to the cart and shows a short confirmation.
+    private async Task AddToCart()
+    {
+        if (product == null || isAdding)
+            return;
+
+        isAdding = true;
+        await Cart.Add(product);
+        addedMessage = "Added to Cart ✓";
+        isAdding = false;
     }
 }
