@@ -13,11 +13,13 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<ShopDbContext>(options =>
     options.UseSqlite("Data Source=shop.db"));
 
-// Register services - Use Singleton for AuthStateService
-builder.Services.AddSingleton<AuthStateService>();  // Changed from Scoped to Singleton
+// Register services - AuthStateService is Scoped so each browser circuit
+// (per user) has its own login state instead of sharing one across all users.
+builder.Services.AddScoped<AuthStateService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<OrderService>();
 
 var app = builder.Build();
 
