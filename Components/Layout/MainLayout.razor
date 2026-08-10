@@ -9,10 +9,11 @@
         <div class="container">
             <div class="header-content">
                 <a href="/" class="logo">🛒 ShopHub</a>
-                <div class="search-bar">
-                    <input type="text" placeholder="Search for products..." />
-                    <button>🔍</button>
-                </div>
+                <form class="search-bar" @onsubmit="HandleSearch" @onsubmit:preventDefault="true">
+                    <label for="header-search" class="visually-hidden">Search for products</label>
+                    <input id="header-search" type="text" @bind="searchTerm" @bind:event="oninput" placeholder="Search for products..." />
+                    <button type="submit" aria-label="Search">🔍</button>
+                </form>
                 <div class="nav-links">
                     <a href="/products">Products</a>
                     <a href="/cart">🛒 Cart <span class="cart-count">@CartService.ItemCount</span></a>
@@ -24,7 +25,11 @@
                         {
                             <a href="/admin">Dashboard</a>
                         }
-                        <a href="/" @onclick="Logout">Logout</a>
+                        @if (IsSeller)
+                        {
+                            <a href="/manage-products">Manage Products</a>
+                        }
+                        <a href="#" @onclick="Logout" @onclick:preventDefault="true">Logout</a>
                     }
                     else
                     {
@@ -53,8 +58,7 @@
                 <div>
                     <h4>Quick Links</h4>
                     <a href="/products">Products</a>
-                    <a href="/about">About</a>
-                    <a href="/contact">Contact</a>
+                    <a href="/cart">Cart</a>
                 </div>
                 <div>
                     <h4>Account</h4>
@@ -238,13 +242,28 @@
 </style>
 
 @code {
+    private string searchTerm = "";
+
     private bool IsAdmin =>
         AuthStateService.CurrentUser?.UserType == "Admin";
 
-    protected override void OnInitialized()
+    // Route the header search to the products page with the query applied.
+    private void HandleSearch()
+    {
+        var term = searchTerm.Trim();
+        var target = string.IsNullOrEmpty(term)
+            ? "/products"
+            : $"/products?q={Uri.EscapeDataString(term)}";
+        NavigationManager?.NavigateTo(target);
+    }
+
+    // Listen for cart and login changes and load the saved cart so the
+    // header shows the right item count right away.
+    protected override async Task OnInitializedAsync()
     {
         CartService.Changed += OnCartChanged;
         AuthStateService.OnChange += OnAuthStateChanged;
+        await CartService.LoadCartAsync();
     }
 
     private async void OnCartChanged()
@@ -263,11 +282,19 @@
         NavigationManager?.NavigateTo("/", true);
     }
 
+    // Unsubscribe when the layout is disposed so the handlers don't linger.
     public void Dispose()
     {
         CartService.Changed -= OnCartChanged;
         AuthStateService.OnChange -= OnAuthStateChanged;
     }
+
+    private static readonly string[] SellerTypes = { "Seller", "Both" };
+
+    // Sellers (and buyer+seller accounts) get the manage products link.
+    private bool IsSeller =>
+        AuthStateService.CurrentUser != null &&
+        SellerTypes.Contains(AuthStateService.CurrentUser.UserType ?? "");
 
     [Inject]
     private NavigationManager? NavigationManager { get; set; }

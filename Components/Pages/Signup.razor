@@ -83,7 +83,7 @@
 
             <div class="form-group terms">
                 <input type="checkbox" id="terms" @bind="signupModel.AcceptTerms" />
-                <label for="terms">I agree to the <a href="/terms">Terms & Conditions</a> and <a href="/privacy">Privacy Policy</a></label>
+                <label for="terms">I agree to the Terms & Conditions and Privacy Policy</label>
             </div>
 
             <button class="btn-signup" @onclick="HandleSignup" disabled="@(!signupModel.AcceptTerms || isSigningUp)">
@@ -287,6 +287,7 @@
     [Inject]
     private NavigationManager? NavigationManager { get; set; }
 
+    // Validate the form, create the account, then go home signed in.
     private async Task HandleSignup()
     {
         isSigningUp = true;

@@ -14,12 +14,14 @@ builder.Services.AddDbContext<ShopDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
         ?? "Data Source=shop.db"));
 
-// Register services
-builder.Services.AddSingleton<AuthStateService>();
+// Register services - AuthStateService is Scoped so each browser circuit
+// (per user) has its own login state instead of sharing one across all users.
+builder.Services.AddScoped<AuthStateService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ReviewService>();
+builder.Services.AddScoped<OrderService>();
 
 var app = builder.Build();
 

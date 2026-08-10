@@ -113,11 +113,13 @@
     private string buttonText = "Add to Cart";
     private string? statusMessage;
 
+    // Clicking the card opens the product detail page.
     private void NavigateToProduct()
     {
         Navigation.NavigateTo($"/product/{Product.Id}");
     }
 
+    // Adds the product to the cart and briefly confirms it.
     private async Task AddToCart()
     {
         await Cart.Add(Product);

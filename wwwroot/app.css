@@ -6,10 +6,30 @@ a, .btn-link {
     color: #006bb7;
 }
 
+/* Brand buttons (navy on yellow). Pages override the Bootstrap defaults. */
 .btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    color: #2c3e50;
+    background-color: #f1c40f;
+    border-color: #f1c40f;
+}
+
+/* Clear focus ring on everything so keyboard users can see where they are. */
+:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Labels for icon-only controls, hidden but still readable by screen readers. */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {

@@ -4,6 +4,10 @@ using CSE325_Team4_GroupProject.Models;
 
 namespace CSE325_Team4_GroupProject.Services;
 
+/// <summary>
+/// Client-side shopping cart persisted to browser localStorage.
+/// Raises Changed so components (header count, cart page) stay in sync.
+/// </summary>
 public class CartService
 {
     private readonly IJSRuntime _js;

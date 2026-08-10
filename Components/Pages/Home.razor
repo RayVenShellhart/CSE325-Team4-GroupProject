@@ -21,16 +21,10 @@
     <section class="categories">
         <h2>Shop by Category</h2>
         <div class="category-grid">
-            <div class="category-card">👕 Clothing</div>
-            <div class="category-card">🍕 Food</div>
-            <div class="category-card">🪑 Furniture</div>
-            <div class="category-card">📱 Electronics</div>
-            <div class="category-card">📚 Books</div>
-            <div class="category-card">🎮 Games</div>
-            <div class="category-card">👟 Sports</div>
-            <div class="category-card">💄 Beauty</div>
-            <div class="category-card">🚗 Automotive</div>
-            <div class="category-card">🏠 Home & Garden</div>
+            @foreach (var category in Categories)
+            {
+                <a class="category-card" href="/products?category=@Uri.EscapeDataString(category.Name)">@category.Emoji @category.Name</a>
+            }
         </div>
     </section>
 
@@ -61,28 +55,28 @@
                 <h3>Wireless Earbuds</h3>
                 <p class="old-price">@CurrencyHelper.Format(25m, UserCountry)</p>
                 <p class="deal-price">@CurrencyHelper.Format(20m, UserCountry)</p>
-                <button class="btn-deal">Shop Now</button>
+                <a class="btn-deal" href="/products?q=wireless">Shop Now</a>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-15%</span>
                 <h3>Smart Watch</h3>
                 <p class="old-price">@CurrencyHelper.Format(50m, UserCountry)</p>
                 <p class="deal-price">@CurrencyHelper.Format(42.50m, UserCountry)</p>
-                <button class="btn-deal">Shop Now</button>
+                <a class="btn-deal" href="/products?q=smart">Shop Now</a>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-30%</span>
                 <h3>Running Shoes</h3>
                 <p class="old-price">@CurrencyHelper.Format(35m, UserCountry)</p>
                 <p class="deal-price">@CurrencyHelper.Format(24.50m, UserCountry)</p>
-                <button class="btn-deal">Shop Now</button>
+                <a class="btn-deal" href="/products?q=shoes">Shop Now</a>
             </div>
             <div class="deal-card">
                 <span class="deal-badge">-10%</span>
                 <h3>Laptop Bag</h3>
                 <p class="old-price">@CurrencyHelper.Format(15m, UserCountry)</p>
                 <p class="deal-price">@CurrencyHelper.Format(13.50m, UserCountry)</p>
-                <button class="btn-deal">Shop Now</button>
+                <a class="btn-deal" href="/products">Shop Now</a>
             </div>
         </div>
     </section>
@@ -230,6 +224,9 @@
         cursor: pointer;
         transition: transform 0.3s, box-shadow 0.3s;
         font-size: 16px;
+        text-decoration: none;
+        color: #2c3e50;
+        display: block;
     }
 
     .category-card:hover {
@@ -301,6 +298,9 @@
         font-weight: bold;
         transition: background 0.3s;
         margin-top: 10px;
+        text-decoration: none;
+        color: #2c3e50;
+        display: inline-block;
     }
 
     .btn-deal:hover {
@@ -379,8 +379,18 @@
     private List<Product> featuredProducts = new();
     private bool isLoading = true;
 
+    // Categories shown on the home page. Each links to the product list,
+    // pre-filtered to that category.
+    private static readonly (string Emoji, string Name)[] Categories =
+    {
+        ("👕", "Clothing"), ("🍕", "Food"), ("🪑", "Furniture"), ("📱", "Electronics"),
+        ("📚", "Books"), ("🎮", "Games"), ("👟", "Sports"), ("💄", "Beauty"),
+        ("🚗", "Automotive"), ("🏠", "Home & Garden")
+    };
+
     protected override async Task OnInitializedAsync()
     {
+        // Seed once, then show the top-rated products on the landing page.
         isLoading = true;
         await ProductService.SeedProductsAsync();
         featuredProducts = await ProductService.GetFeaturedProductsAsync();

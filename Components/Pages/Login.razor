@@ -45,7 +45,6 @@
 
             <div class="auth-footer">
                 <p>Don't have an account? <a href="/signup">Sign Up</a></p>
-                <p><a href="/forgot-password">Forgot password?</a></p>
             </div>
         </div>
     </div>
@@ -216,6 +215,7 @@
     [Inject]
     private NavigationManager? NavigationManager { get; set; }
 
+    // Check the credentials, store the signed-in user, then go home.
     private async Task HandleLogin()
     {
         isLoggingIn = true;

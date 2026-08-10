@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CSE325_Team4_GroupProject.Services;
 
+/// <summary>
+/// Data access for products: querying, seeding, and full CRUD operations.
+/// </summary>
 public class ProductService
 {
     private readonly ShopDbContext _context;

@@ -2,6 +2,7 @@
 @using CSE325_Team4_GroupProject.Services
 @inject CartService Cart
 @inject AuthStateService AuthStateService
+@inject OrderService OrderService
 @inject NavigationManager Navigation
 
 <PageTitle>ShopHub - Checkout</PageTitle>
@@ -434,6 +435,7 @@
         errorMessage = "";
     }
 
+    // Check the shipping and payment details, save the order, then empty the cart.
     private async Task PlaceOrder()
     {
         errorMessage = "";
@@ -498,10 +500,41 @@
         }
 
         isPlacing = true;
-        successMessage = $"Order placed successfully via {PaymentLabel}!";
-        await Task.Delay(800);
-        await Cart.Clear();
-        isPlacing = false;
-        Navigation.NavigateTo("/");
+
+        try
+        {
+            var order = new Order
+            {
+                UserId = AuthStateService.CurrentUser?.Id,
+                CustomerName = fullName,
+                Email = email,
+                Address = address,
+                City = city,
+                Country = country,
+                Phone = phone,
+                PaymentMethod = paymentMethod,
+                Items = Cart.Items.Select(i => new OrderItem
+                {
+                    ProductId = i.ProductId,
+                    Name = i.Name,
+                    Price = i.Price,
+                    Quantity = i.Quantity
+                }).ToList()
+            };
+
+            var orderId = await OrderService.CreateOrderAsync(order);
+            await Cart.Clear();
+            successMessage = $"Order placed successfully via {PaymentLabel}! Your order number is #{orderId}.";
+            await Task.Delay(800);
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception)
+        {
+            errorMessage = "Something went wrong while placing your order. Please try again.";
+        }
+        finally
+        {
+            isPlacing = false;
+        }
     }
 }
