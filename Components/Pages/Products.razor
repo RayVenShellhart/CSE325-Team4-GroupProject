@@ -20,6 +20,8 @@
                 <option value="Games">Games</option>
                 <option value="Sports">Sports</option>
                 <option value="Beauty">Beauty</option>
+                <option value="Automotive">Automotive</option>
+                <option value="Home & Garden">Home & Garden</option>
             </select>
         </div>
 
@@ -98,6 +100,15 @@
     private string sortBy = "name";
     private string searchTerm = "";
 
+    // Filters coming in from the URL, e.g. /products?category=Furniture&q=chair
+    // (used by the home page category cards and the header search).
+    [SupplyParameterFromQuery(Name = "category")]
+    private string? Category { get; set; }
+
+    [SupplyParameterFromQuery(Name = "q")]
+    private string? Search { get; set; }
+
+    // Filters by category and search term, then sorts what's left.
     private List<Product> filteredProducts
     {
         get
@@ -129,8 +140,14 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    // Runs on first load and whenever the page is navigated to again, so the
+    // filters stay in sync with the URL.
+    protected override async Task OnParametersSetAsync()
     {
+        selectedCategory = Category ?? "";
+        searchTerm = Search ?? "";
+
+        // Make sure sample data exists, then load everything.
         await ProductService.SeedProductsAsync();
         allProducts = await ProductService.GetAllProductsAsync();
     }
