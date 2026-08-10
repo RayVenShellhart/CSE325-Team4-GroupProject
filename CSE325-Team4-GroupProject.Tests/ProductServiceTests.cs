@@ -93,6 +93,7 @@ public class ProductServiceTests
 
         var created = await service.CreateProductAsync(MakeProduct("New Item"));
 
+        Assert.NotNull(created);
         Assert.True(created.Id > 0);
         var result = await service.GetProductByIdAsync(created.Id);
         Assert.NotNull(result);

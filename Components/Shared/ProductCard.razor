@@ -1,5 +1,6 @@
 @using CSE325_Team4_GroupProject.Models
 @inject CSE325_Team4_GroupProject.Services.CartService Cart
+@inject CSE325_Team4_GroupProject.Services.AuthStateService AuthStateService
 @inject NavigationManager Navigation
 
 <div class="product-card" @onclick="NavigateToProduct">
@@ -15,7 +16,7 @@
         </p>
 
         <span class="price">
-            ₦@Product.Price
+            @CurrencyHelper.Format(Product.Price, AuthStateService.CurrentUser?.Country)
         </span>
 
         <div class="rating">

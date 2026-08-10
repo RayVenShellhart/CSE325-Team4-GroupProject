@@ -32,7 +32,7 @@ public class UserService
             .FirstOrDefaultAsync(u =>
                 u.Email != null && u.Email.ToLower() == emailLower);
 
-        if (user == null)
+        if (user == null || !user.IsActive)
         {
             return null;
         }
@@ -71,6 +71,13 @@ public class UserService
             return null; // Email already exists
         }
 
+        // Prevent self-registration as Admin
+        if (string.Equals(user.UserType, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            user.UserType = "Buyer";
+        }
+
+        user.IsActive = true;
         user.CreatedAt = DateTime.Now;
         if (!string.IsNullOrEmpty(user.Password))
         {
@@ -83,7 +90,7 @@ public class UserService
 
     public async Task<List<User>> GetAllUsersAsync()
     {
-        return await _context.Users.ToListAsync();
+        return await _context.Users.OrderBy(u => u.CreatedAt).ToListAsync();
     }
 
     public async Task<User?> GetUserByIdAsync(int id)
@@ -102,5 +109,41 @@ public class UserService
 
         return await _context.Users
             .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == emailLower);
+    }
+
+    public async Task<bool> UpdateUserAsync(User user)
+    {
+        var existing = await _context.Users.FindAsync(user.Id);
+        if (existing == null)
+            return false;
+
+        existing.FirstName = user.FirstName;
+        existing.LastName = user.LastName;
+        existing.Email = user.Email;
+        existing.PhoneNumber = user.PhoneNumber;
+        existing.Address = user.Address;
+        existing.ProfileImage = user.ProfileImage;
+        existing.Country = user.Country;
+        existing.UserType = user.UserType;
+        existing.IsActive = user.IsActive;
+
+        if (!string.IsNullOrEmpty(user.Password))
+        {
+            existing.Password = _passwordHasher.HashPassword(existing, user.Password);
+        }
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> SetUserActiveStatusAsync(int userId, bool isActive)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+            return false;
+
+        user.IsActive = isActive;
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

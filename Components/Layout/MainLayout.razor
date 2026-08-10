@@ -20,7 +20,11 @@
 
                     @if (AuthStateService.CurrentUser != null)
                     {
-                        <span class="user-greeting">👋 @AuthStateService.CurrentUser.FirstName</span>
+                        <a href="/profile" class="user-greeting">👋 @AuthStateService.CurrentUser.FirstName</a>
+                        @if (IsAdmin)
+                        {
+                            <a href="/admin">Dashboard</a>
+                        }
                         @if (IsSeller)
                         {
                             <a href="/manage-products">Manage Products</a>
@@ -29,8 +33,7 @@
                     }
                     else
                     {
-                        <a href="/login">Login</a>
-                        <a href="/signup">Sign Up</a>
+                        <a href="/login">Login/Sign Up</a>
                     }
                 </div>
             </div>
@@ -59,8 +62,7 @@
                 </div>
                 <div>
                     <h4>Account</h4>
-                    <a href="/login">Login</a>
-                    <a href="/signup">Sign Up</a>
+                    <a href="/login">Login/Sign Up</a>
                 </div>
                 <div>
                     <h4>Follow Us</h4>
@@ -162,6 +164,12 @@
         color: #f1c40f;
         font-weight: bold;
         font-size: 14px;
+        text-decoration: none;
+    }
+
+    .user-greeting:hover {
+        color: #f39c12;
+        text-decoration: underline;
     }
 
     .cart-count {
@@ -235,6 +243,9 @@
 
 @code {
     private string searchTerm = "";
+
+    private bool IsAdmin =>
+        AuthStateService.CurrentUser?.UserType == "Admin";
 
     // Route the header search to the products page with the query applied.
     private void HandleSearch()

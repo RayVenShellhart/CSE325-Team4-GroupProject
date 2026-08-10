@@ -1,0 +1,346 @@
+@page "/admin/users"
+@using CSE325_Team4_GroupProject.Models
+@using CSE325_Team4_GroupProject.Services
+@inject AuthStateService AuthStateService
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<PageTitle>ShopHub - Manage Users</PageTitle>
+
+@if (!IsAdmin)
+{
+    <div class="alert alert-warning">
+        <h3>Access denied</h3>
+        <p>Admin privileges are required.</p>
+        <a href="/login">Login</a>
+    </div>
+}
+else
+{
+    <div class="admin-page">
+        <div class="page-header">
+            <div>
+                <h1>👥 Manage Users</h1>
+                <p class="subtitle">Activate, deactivate, and change user roles</p>
+            </div>
+            <a href="/admin" class="back-link">← Dashboard</a>
+        </div>
+
+        @if (!string.IsNullOrEmpty(statusMessage))
+        {
+            <div class="alert @(isError ? "alert-danger" : "alert-success")">@statusMessage</div>
+        }
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Role</label>
+                <select @bind="filterRole" @bind:after="ApplyFilters">
+                    <option value="">All</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Seller">Seller</option>
+                    <option value="Buyer">Buyer</option>
+                    <option value="Both">Both</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Status</label>
+                <select @bind="filterStatus" @bind:after="ApplyFilters">
+                    <option value="">All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="filter-group search">
+                <label>Search</label>
+                <input type="text" placeholder="Name or email..." @bind="searchTerm" @bind:event="oninput" @bind:after="ApplyFilters" />
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <p>Loading users...</p>
+        }
+        else if (filteredUsers.Count == 0)
+        {
+            <div class="empty">No users match your filters.</div>
+        }
+        else
+        {
+            <div class="table-wrap">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var u in filteredUsers)
+                        {
+                            <tr class="@(!u.IsActive ? "row-inactive" : "")">
+                                <td>
+                                    <strong>@u.FirstName @u.LastName</strong>
+                                    @if (u.Id == AuthStateService.CurrentUser?.Id)
+                                    {
+                                        <span class="you-badge">You</span>
+                                    }
+                                </td>
+                                <td>@u.Email</td>
+                                <td>
+                                    @if (u.Id == AuthStateService.CurrentUser?.Id)
+                                    {
+                                        <span class="role-label">@u.UserType</span>
+                                    }
+                                    else
+                                    {
+                                        <select class="role-select" value="@u.UserType"
+                                                @onchange="(e) => ChangeRole(u, e.Value?.ToString())">
+                                            <option value="Buyer">Buyer</option>
+                                            <option value="Seller">Seller</option>
+                                            <option value="Both">Both</option>
+                                            <option value="Admin">Admin</option>
+                                        </select>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge @(u.IsActive ? "badge-active" : "badge-inactive")">
+                                        @(u.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </td>
+                                <td>@u.CreatedAt.ToString("MMM d, yyyy")</td>
+                                <td class="actions">
+                                    @if (u.Id != AuthStateService.CurrentUser?.Id)
+                                    {
+                                        <button class="btn-sm @(u.IsActive ? "btn-deactivate" : "btn-activate")"
+                                                @onclick="() => ToggleActive(u)">
+                                            @(u.IsActive ? "Deactivate" : "Activate")
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="muted">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <p class="count">Showing @filteredUsers.Count of @allUsers.Count users</p>
+        }
+    </div>
+}
+
+<style>
+    .admin-page { padding: 10px 0 40px; }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .page-header h1 { margin: 0 0 4px; color: #2c3e50; font-size: 28px; }
+    .subtitle { margin: 0; color: #7f8c8d; font-size: 14px; }
+    .back-link { color: #3498db; text-decoration: none; font-size: 14px; }
+    .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding: 16px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .filter-group label { font-size: 12px; font-weight: 600; color: #555; }
+    .filter-group select, .filter-group input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        min-width: 140px;
+    }
+    .filter-group.search input { min-width: 200px; }
+    .table-wrap {
+        overflow-x: auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .user-table { width: 100%; border-collapse: collapse; }
+    .user-table th {
+        text-align: left;
+        padding: 14px 12px;
+        background: #2c3e50;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .user-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+    .row-inactive { opacity: 0.65; }
+    .you-badge {
+        background: #f1c40f;
+        color: #2c3e50;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin-left: 6px;
+        font-weight: 600;
+    }
+    .role-select {
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 13px;
+    }
+    .role-label { font-weight: 600; }
+    .badge {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-inactive { background: #f8d7da; color: #721c24; }
+    .actions { white-space: nowrap; }
+    .btn-sm {
+        border: none;
+        padding: 6px 12px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+    }
+    .btn-activate { background: #27ae60; }
+    .btn-deactivate { background: #e67e22; }
+    .muted { color: #bbb; }
+    .count { margin-top: 12px; color: #7f8c8d; font-size: 13px; }
+    .empty {
+        text-align: center;
+        padding: 40px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        color: #7f8c8d;
+    }
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        font-size: 14px;
+    }
+    .alert-success { background: #d4edda; color: #155724; }
+    .alert-danger { background: #f8d7da; color: #721c24; }
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        padding: 24px;
+        border-radius: 10px;
+    }
+</style>
+
+@code {
+    private List<User> allUsers = new();
+    private List<User> filteredUsers = new();
+    private bool isLoading = true;
+    private string statusMessage = "";
+    private bool isError;
+    private string filterRole = "";
+    private string filterStatus = "";
+    private string searchTerm = "";
+
+    private bool IsAdmin =>
+        AuthStateService.CurrentUser?.UserType == "Admin";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsAdmin)
+        {
+            isLoading = false;
+            return;
+        }
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        allUsers = await UserService.GetAllUsersAsync();
+        ApplyFilters();
+        isLoading = false;
+    }
+
+    private void ApplyFilters()
+    {
+        IEnumerable<User> q = allUsers;
+
+        if (!string.IsNullOrEmpty(filterRole))
+            q = q.Where(u => u.UserType == filterRole);
+
+        if (filterStatus == "active")
+            q = q.Where(u => u.IsActive);
+        else if (filterStatus == "inactive")
+            q = q.Where(u => !u.IsActive);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim();
+            q = q.Where(u =>
+                (u.FirstName != null && u.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                (u.LastName != null && u.LastName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                (u.Email != null && u.Email.Contains(term, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        filteredUsers = q.OrderByDescending(u => u.CreatedAt).ToList();
+    }
+
+    private async Task ToggleActive(User u)
+    {
+        // Prevent deactivating the last admin accidentally is nice but skip for simplicity
+        var ok = await UserService.SetUserActiveStatusAsync(u.Id, !u.IsActive);
+        if (ok)
+        {
+            statusMessage = $"{u.FirstName} is now {(u.IsActive ? "inactive" : "active")}.";
+            isError = false;
+            await LoadUsers();
+        }
+        else
+        {
+            statusMessage = "Could not update user status.";
+            isError = true;
+        }
+    }
+
+    private async Task ChangeRole(User u, string? newRole)
+    {
+        if (string.IsNullOrEmpty(newRole) || newRole == u.UserType)
+            return;
+
+        u.UserType = newRole;
+        // Don't overwrite password
+        u.Password = null;
+        var ok = await UserService.UpdateUserAsync(u);
+        if (ok)
+        {
+            statusMessage = $"{u.FirstName}'s role changed to {newRole}.";
+            isError = false;
+            await LoadUsers();
+        }
+        else
+        {
+            statusMessage = "Could not change role.";
+            isError = true;
+        }
+    }
+}

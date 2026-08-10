@@ -200,3 +200,4 @@
 | 2026-08-10 | T3.1 xUnit suite done (24/24 pass), T3.2 CI test step added, T5.3 SQLitePCLRaw 3.0.5 (0 warnings). |
 | 2026-08-10 | T3.3 README rewritten + code comments added to services and key pages. Tier 3 complete. |
 | 2026-08-10 | Tier 4: home category cards + deal buttons navigate to pre-filtered `/products`; `Products` reads `category`/`q` from URL; header search wired; a11y pass (aria-labels, alt, focus-visible); brand buttons + utilities in `app.css`. Smoke-tested routes 200. |
+| 2026-08-10 | Merged `origin/main` (PR #7: reviews/ratings, checkout payments, admin/seller/profile pages, expanded schema) into `natanaels-branch`. Resolved conflicts: kept password hashing, Scoped auth, order persistence, seller CRUD, Tier 4 UX; kept main's reviews/payments/seller+admin pages. Regenerated `AddOrders` migration on the merged schema. Added `OrderServiceTests` (29/29 passing), build 0 warnings. Smoke-tested all key routes 200. |
