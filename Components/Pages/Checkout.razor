@@ -1,5 +1,7 @@
 @page "/checkout"
-@inject CSE325_Team4_GroupProject.Services.CartService Cart
+@using CSE325_Team4_GroupProject.Services
+@inject CartService Cart
+@inject AuthStateService AuthStateService
 @inject NavigationManager Navigation
 
 <PageTitle>ShopHub - Checkout</PageTitle>
@@ -19,19 +21,145 @@
         <div class="checkout-layout">
             <div class="checkout-form">
                 <h2>Shipping Information</h2>
-                <label>Name</label>
-                <input placeholder="Full name" />
+                <label>Full Name *</label>
+                <input @bind="fullName" placeholder="Full name" />
 
-                <label>Address</label>
-                <input placeholder="Street address" />
+                <label>Email *</label>
+                <input @bind="email" type="email" placeholder="you@example.com" />
 
-                <label>City</label>
-                <input placeholder="City" />
+                <label>Address *</label>
+                <input @bind="address" placeholder="Street address" />
 
-                <label>Phone</label>
-                <input placeholder="Phone number" />
+                <div class="row-2">
+                    <div>
+                        <label>City *</label>
+                        <input @bind="city" placeholder="City" />
+                    </div>
+                    <div>
+                        <label>Country *</label>
+                        <select @bind="country" @bind:after="OnCountryChanged">
+                            <option value="">Select country</option>
+                            @foreach (var c in CurrencyHelper.Countries)
+                            {
+                                <option value="@c.Code">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
 
-                <button class="btn btn-primary place-order-btn" @onclick="PlaceOrder">Place Order</button>
+                <label>Phone *</label>
+                <input @bind="phone" placeholder="Phone number" />
+
+                <h2 class="section-title">Payment Method *</h2>
+                <div class="payment-options">
+                    <label class="payment-option @(paymentMethod == "Card" ? "selected" : "")">
+                        <input type="radio" name="payment" value="Card" @onchange="OnPaymentChanged" checked="@(paymentMethod == "Card")" />
+                        <span class="option-icon">💳</span>
+                        <span>Card</span>
+                    </label>
+                    <label class="payment-option @(paymentMethod == "MobileMoney" ? "selected" : "")">
+                        <input type="radio" name="payment" value="MobileMoney" @onchange="OnPaymentChanged" checked="@(paymentMethod == "MobileMoney")" />
+                        <span class="option-icon">📱</span>
+                        <span>Mobile Money</span>
+                    </label>
+                    <label class="payment-option @(paymentMethod == "BankTransfer" ? "selected" : "")">
+                        <input type="radio" name="payment" value="BankTransfer" @onchange="OnPaymentChanged" checked="@(paymentMethod == "BankTransfer")" />
+                        <span class="option-icon">🏦</span>
+                        <span>Bank Transfer</span>
+                    </label>
+                    <label class="payment-option @(paymentMethod == "CashOnDelivery" ? "selected" : "")">
+                        <input type="radio" name="payment" value="CashOnDelivery" @onchange="OnPaymentChanged" checked="@(paymentMethod == "CashOnDelivery")" />
+                        <span class="option-icon">💵</span>
+                        <span>Cash on Delivery</span>
+                    </label>
+                </div>
+
+                @if (paymentMethod == "Card")
+                {
+                    <div class="payment-details">
+                        <h3>Card Details</h3>
+                        <label>Cardholder Name *</label>
+                        <input @bind="cardName" placeholder="Name on card" />
+
+                        <label>Card Number *</label>
+                        <input @bind="cardNumber" placeholder="ACCT-000035" maxlength="19" />
+
+                        <div class="row-2">
+                            <div>
+                                <label>Expiry (MM/YY) *</label>
+                                <input @bind="cardExpiry" placeholder="MM/YY" maxlength="5" />
+                            </div>
+                            <div>
+                                <label>CVV *</label>
+                                <input @bind="cardCvv" placeholder="123" maxlength="4" type="password" />
+                            </div>
+                        </div>
+                        <p class="hint">Demo only — card details are not stored or charged.</p>
+                    </div>
+                }
+                else if (paymentMethod == "MobileMoney")
+                {
+                    <div class="payment-details">
+                        <h3>Mobile Money Details</h3>
+                        <label>Provider *</label>
+                        <select @bind="mobileProvider">
+                            <option value="">Select provider</option>
+                            <option value="MTN">MTN MoMo</option>
+                            <option value="Airtel">Airtel Money</option>
+                            <option value="Glo">Glo</option>
+                            <option value="9mobile">9mobile</option>
+                        </select>
+
+                        <label>Mobile Number *</label>
+                        <input @bind="mobileNumber" placeholder="e.g. 08012345678" />
+                    </div>
+                }
+                else if (paymentMethod == "BankTransfer")
+                {
+                    <div class="payment-details">
+                        <h3>Bank Transfer Details</h3>
+                        <div class="bank-info">
+                            <p><strong>Bank:</strong> ShopHub Bank</p>
+                            <p><strong>Account Name:</strong> ShopHub Ltd</p>
+                            <p><strong>Account Number:</strong> 0123456789</p>
+                            <p><strong>Amount:</strong> @CurrencyHelper.Format(Cart.TotalPrice, country)</p>
+                            <p class="hint">Transfer the total amount, then enter your reference below.</p>
+                        </div>
+
+                        <label>Your Bank Name *</label>
+                        <input @bind="bankName" placeholder="Bank you transferred from" />
+
+                        <label>Transfer Reference / Narration *</label>
+                        <input @bind="transferReference" placeholder="Reference or transaction ID" />
+                    </div>
+                }
+                else if (paymentMethod == "CashOnDelivery")
+                {
+                    <div class="payment-details">
+                        <h3>Cash on Delivery</h3>
+                        <p class="cod-note">
+                            Pay with cash when your order is delivered.
+                            Please ensure someone is available at the shipping address to receive the package and make payment.
+                        </p>
+                        <label class="checkbox-row">
+                            <input type="checkbox" @bind="codConfirmed" />
+                            <span>I confirm I will pay cash on delivery *</span>
+                        </label>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="error-msg">@errorMessage</div>
+                }
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="success-msg">@successMessage</div>
+                }
+
+                <button class="btn btn-primary place-order-btn" @onclick="PlaceOrder" disabled="@isPlacing">
+                    @(isPlacing ? "Processing..." : PlaceOrderButtonText)
+                </button>
             </div>
 
             <div class="summary-card">
@@ -40,12 +168,16 @@
                 {
                     <div class="summary-item">
                         <span>@item.Name x @item.Quantity</span>
-                        <span>₦@((item.Price * item.Quantity).ToString("0.00"))</span>
+                        <span>@CurrencyHelper.Format(item.Price * item.Quantity, country)</span>
                     </div>
                 }
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>₦@Cart.TotalPrice.ToString("0.00")</span>
+                    <span>@CurrencyHelper.Format(Cart.TotalPrice, country)</span>
+                </div>
+                <div class="summary-payment">
+                    <div>Currency: @CurrencyHelper.CurrencyLabel(country)</div>
+                    <div>Payment: @PaymentLabel</div>
                 </div>
             </div>
         </div>
@@ -55,22 +187,321 @@
 <style>
     .checkout-page { padding: 20px 0; }
     .checkout-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
-    .checkout-form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .checkout-form input { display: block; width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 5px; }
-    .place-order-btn { width: 100%; padding: 12px; margin-top: 10px; }
-    .summary-card { background: #f8f9fa; padding: 20px; border-radius: 8px; height: fit-content; }
-    .summary-item, .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    .summary-row.total { font-weight: bold; font-size: 18px; }
+    .checkout-form {
+        background: white;
+        padding: 24px;
+        border-radius: 10px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .checkout-form h2 { margin: 0 0 16px; color: #2c3e50; font-size: 20px; }
+    .section-title { margin-top: 28px !important; padding-top: 20px; border-top: 1px solid #eee; }
+    .checkout-form label {
+        display: block;
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 5px;
+        color: #2c3e50;
+    }
+    .checkout-form input,
+    .checkout-form select {
+        display: block;
+        width: 100%;
+        padding: 10px 12px;
+        margin-bottom: 14px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background: white;
+    }
+    .checkout-form input:focus,
+    .checkout-form select:focus {
+        border-color: #3498db;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(52,152,219,0.12);
+    }
+    .payment-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .payment-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        color: #2c3e50;
+        transition: border-color 0.15s, background 0.15s;
+        margin: 0;
+    }
+    .payment-option input { width: auto; margin: 0; flex-shrink: 0; }
+    .payment-option.selected {
+        border-color: #3498db;
+        background: #eaf4fc;
+    }
+    .option-icon { font-size: 18px; }
+    .payment-details {
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+    .payment-details h3 {
+        margin: 0 0 14px;
+        font-size: 16px;
+        color: #2c3e50;
+    }
+    .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .bank-info {
+        background: white;
+        padding: 12px 14px;
+        border-radius: 6px;
+        margin-bottom: 14px;
+        border-left: 4px solid #3498db;
+    }
+    .bank-info p { margin: 4px 0; font-size: 14px; color: #555; }
+    .hint { color: #7f8c8d !important; font-size: 13px !important; margin-top: 8px !important; }
+    .cod-note {
+        color: #555;
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 0 0 14px;
+    }
+    .checkbox-row {
+        display: flex !important;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500 !important;
+        cursor: pointer;
+    }
+    .checkbox-row input { width: auto !important; margin: 0 !important; }
+    .place-order-btn {
+        width: 100%;
+        padding: 14px;
+        margin-top: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+        background: #f1c40f;
+        color: #2c3e50;
+    }
+    .place-order-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .summary-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        height: fit-content;
+        position: sticky;
+        top: 90px;
+    }
+    .summary-card h2 { margin: 0 0 16px; font-size: 18px; color: #2c3e50; }
+    .summary-item, .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 14px;
+        gap: 12px;
+    }
+    .summary-row.total {
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #ddd;
+    }
+    .summary-payment {
+        margin-top: 12px;
+        font-size: 13px;
+        color: #7f8c8d;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
     .empty-cart { text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; }
     .btn { padding: 10px 18px; text-decoration: none; display: inline-block; }
     .btn-primary { background: #f1c40f; color: #2c3e50; border: none; border-radius: 5px; cursor: pointer; }
-    @@media (max-width: 900px) { .checkout-layout { grid-template-columns: 1fr; } }
+    .error-msg {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        font-size: 14px;
+    }
+    .success-msg {
+        background: #d4edda;
+        color: #155724;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+        font-size: 14px;
+    }
+    @@media (max-width: 900px) {
+        .checkout-layout { grid-template-columns: 1fr; }
+        .payment-options { grid-template-columns: 1fr; }
+        .row-2 { grid-template-columns: 1fr; }
+        .summary-card { position: static; }
+    }
 </style>
 
 @code {
-    private void PlaceOrder()
+    private string fullName = "";
+    private string email = "";
+    private string address = "";
+    private string city = "";
+    private string country = "";
+    private string phone = "";
+    private string paymentMethod = "Card";
+
+    private string cardName = "";
+    private string cardNumber = "";
+    private string cardExpiry = "";
+    private string cardCvv = "";
+
+    private string mobileProvider = "";
+    private string mobileNumber = "";
+
+    private string bankName = "";
+    private string transferReference = "";
+
+    private bool codConfirmed;
+
+    private string errorMessage = "";
+    private string successMessage = "";
+    private bool isPlacing;
+
+    private string PaymentLabel => paymentMethod switch
     {
-        Cart.Clear();
+        "Card" => "Card",
+        "MobileMoney" => "Mobile Money",
+        "BankTransfer" => "Bank Transfer",
+        "CashOnDelivery" => "Cash on Delivery",
+        _ => paymentMethod
+    };
+
+    private string PlaceOrderButtonText
+    {
+        get
+        {
+            var total = CurrencyHelper.Format(Cart.TotalPrice, country);
+            return paymentMethod switch
+            {
+                "Card" => $"Pay {total} with Card",
+                "MobileMoney" => $"Pay {total} with Mobile Money",
+                "BankTransfer" => "Confirm Bank Transfer",
+                "CashOnDelivery" => "Place Order (Cash on Delivery)",
+                _ => "Place Order"
+            };
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        var user = AuthStateService.CurrentUser;
+        if (user != null)
+        {
+            fullName = $"{user.FirstName} {user.LastName}".Trim();
+            email = user.Email ?? "";
+            phone = user.PhoneNumber ?? "";
+            address = user.Address ?? "";
+            country = user.Country ?? "";
+            mobileNumber = user.PhoneNumber ?? "";
+        }
+        if (string.IsNullOrWhiteSpace(country))
+            country = "US";
+    }
+
+    private void OnCountryChanged()
+    {
+        errorMessage = "";
+    }
+
+    private void OnPaymentChanged(ChangeEventArgs e)
+    {
+        paymentMethod = e.Value?.ToString() ?? "Card";
+        errorMessage = "";
+    }
+
+    private async Task PlaceOrder()
+    {
+        errorMessage = "";
+        successMessage = "";
+
+        if (string.IsNullOrWhiteSpace(fullName) ||
+            string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(address) ||
+            string.IsNullOrWhiteSpace(city) ||
+            string.IsNullOrWhiteSpace(phone))
+        {
+            errorMessage = "Please fill in all shipping fields.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(country))
+        {
+            errorMessage = "Please select your country.";
+            return;
+        }
+
+        if (!email.Contains('@'))
+        {
+            errorMessage = "Please enter a valid email address.";
+            return;
+        }
+
+        if (paymentMethod == "Card")
+        {
+            if (string.IsNullOrWhiteSpace(cardName) ||
+                string.IsNullOrWhiteSpace(cardNumber) ||
+                string.IsNullOrWhiteSpace(cardExpiry) ||
+                string.IsNullOrWhiteSpace(cardCvv))
+            {
+                errorMessage = "Please complete all card details.";
+                return;
+            }
+        }
+        else if (paymentMethod == "MobileMoney")
+        {
+            if (string.IsNullOrWhiteSpace(mobileProvider) || string.IsNullOrWhiteSpace(mobileNumber))
+            {
+                errorMessage = "Please select a provider and enter your mobile number.";
+                return;
+            }
+        }
+        else if (paymentMethod == "BankTransfer")
+        {
+            if (string.IsNullOrWhiteSpace(bankName) || string.IsNullOrWhiteSpace(transferReference))
+            {
+                errorMessage = "Please enter your bank name and transfer reference.";
+                return;
+            }
+        }
+        else if (paymentMethod == "CashOnDelivery")
+        {
+            if (!codConfirmed)
+            {
+                errorMessage = "Please confirm you will pay cash on delivery.";
+                return;
+            }
+        }
+
+        isPlacing = true;
+        successMessage = $"Order placed successfully via {PaymentLabel}!";
+        await Task.Delay(800);
+        await Cart.Clear();
+        isPlacing = false;
         Navigation.NavigateTo("/");
     }
 }
