@@ -93,8 +93,4 @@ The app is deployed to Azure App Service (`Shophub`) via the GitHub Actions work
 
 ## Project Board
 
-Task management is tracked on Trello: [link to Trello board]
-
-## License
-
-University coursework project — no license.
+Task management is tracked on Trello: https://trello.com/b/xP2IiJGh/cse325-groupproject
