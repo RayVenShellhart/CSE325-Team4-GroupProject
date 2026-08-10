@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CSE325-Team4-GroupProject.csproj" />
+  <Project Path="CSE325-Team4-GroupProject.Tests/CSE325-Team4-GroupProject.Tests.csproj" />
+</Solution>
