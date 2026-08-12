@@ -10,7 +10,18 @@
 <div class="checkout-page">
     <h1>Checkout</h1>
 
-    @if (!Cart.Items.Any())
+    @if (AuthStateService.CurrentUser == null)
+    {
+        <div class="empty-cart">
+            <p>Please sign in to continue to checkout.</p>
+            <div class="login-prompt-actions">
+                <a class="btn btn-primary" href="/login">Log In</a>
+                <a class="btn btn-outline" href="/signup">Sign Up</a>
+            </div>
+            <p class="login-hint"><a href="/cart">← Back to cart</a></p>
+        </div>
+    }
+    else if (!Cart.Items.Any())
     {
         <div class="empty-cart">
             <p>Your cart is empty. Add items before checking out.</p>
@@ -331,8 +342,19 @@
         gap: 4px;
     }
     .empty-cart { text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; }
-    .btn { padding: 10px 18px; text-decoration: none; display: inline-block; }
-    .btn-primary { background: #f1c40f; color: #2c3e50; border: none; border-radius: 5px; cursor: pointer; }
+    .login-prompt-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 16px 0 8px;
+    }
+    .login-prompt-actions .btn { min-width: 120px; text-align: center; }
+    .login-hint { margin-top: 16px; font-size: 14px; }
+    .login-hint a { color: #3498db; text-decoration: none; }
+    .btn { padding: 10px 18px; text-decoration: none; display: inline-block; border-radius: 5px; cursor: pointer; }
+    .btn-primary { background: #f1c40f; color: #2c3e50; border: none; }
+    .btn-outline { background: transparent; color: #2c3e50; border: 2px solid #2c3e50; }
     .error-msg {
         background: #f8d7da;
         color: #721c24;
