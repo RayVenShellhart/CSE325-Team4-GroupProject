@@ -49,7 +49,7 @@ public class ProductService
             .Take(3)
             .ToListAsync(cancellationToken);
     }
-
+    // REturns products based on seller 
     public async Task<List<Product>> GetProductsBySellerAsync(int sellerId, CancellationToken cancellationToken = default)
     {
         return await _context.Products
@@ -188,7 +188,79 @@ public class ProductService
                 CreatedAt = DateTime.Now
             };
 
-            _context.Users.AddRange(admin, fashionSeller, techSeller, furnitureSeller, sportSeller);
+            var bookSeller = new User
+            {
+                FirstName = "Book",
+                LastName = "Store",
+                Email = "book@shophub.com",
+                Password = "Seller123!",
+                UserType = "Seller",
+                Country = "NG",
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            var foodSeller = new User
+            {
+                FirstName = "Food",
+                LastName = "Store",
+                Email = "food@shophub.com",
+                Password = "Seller123!",
+                UserType = "Seller",
+                Country = "NG",
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            var gameSeller = new User
+            {
+                FirstName = "game",
+                LastName = "Store",
+                Email = "game@shophub.com",
+                Password = "Seller123!",
+                UserType = "Seller",
+                Country = "NG",
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            var beautySeller = new User
+            {
+                FirstName = "Beauty",
+                LastName = "Store",
+                Email = "beauty@shophub.com",
+                Password = "Seller123!",
+                UserType = "Seller",
+                Country = "NG",
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            var autoSeller = new User
+            {
+                FirstName = "Auto",
+                LastName = "Store",
+                Email = "auto@shophub.com",
+                Password = "Seller123!",
+                UserType = "Seller",
+                Country = "NG",
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            var homeGardenSeller = new User
+            {
+                FirstName = "Home & Garden",
+                LastName = "Store",
+                Email = "HG@shophub.com",
+                Password = "Seller123!",
+                UserType = "Seller",
+                Country = "NG",
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Users.AddRange(admin, fashionSeller, techSeller, furnitureSeller, sportSeller, bookSeller, foodSeller, beautySeller, autoSeller, homeGardenSeller, gameSeller);
             await _context.SaveChangesAsync(cancellationToken);
         }
 
@@ -201,6 +273,12 @@ public class ProductService
         var tech = await _context.Users.FirstAsync(u => u.Email == "tech@shophub.com", cancellationToken);
         var furniture = await _context.Users.FirstAsync(u => u.Email == "furniture@shophub.com", cancellationToken);
         var sport = await _context.Users.FirstAsync(u => u.Email == "sport@shophub.com", cancellationToken);
+        var book = await _context.Users.FirstAsync(u => u.Email == "book@shophub.com", cancellationToken);
+        var food = await _context.Users.FirstAsync(u => u.Email == "food@shophub.com", cancellationToken);
+        var beauty = await _context.Users.FirstAsync(u => u.Email == "beauty@shophub.com", cancellationToken);
+        var auto = await _context.Users.FirstAsync(u => u.Email == "auto@shophub.com", cancellationToken);
+        var HG = await _context.Users.FirstAsync(u => u.Email == "HG@shophub.com", cancellationToken);
+        var game = await _context.Users.FirstAsync(u => u.Email == "game@shophub.com", cancellationToken);
 
         var products = new List<Product>
         {
@@ -313,6 +391,90 @@ public class ProductService
                 SellerName = "Tech Store",
                 Category = "Electronics",
                 Stock = 60,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Paperback Book",
+                Price = 10.00M,
+                Description = "Plain Paperback Book",
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Blank_book_on_a_table.jpg/960px-Blank_book_on_a_table.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+                Rating = 4.3,
+                SellerId = book.Id,
+                SellerName = "Book Store",
+                Category = "Books",
+                Stock = 40,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Breakfast Sandwhich",
+                Price = 5.00M,
+                Description = "Breakfast Sandwhich in takeout container",
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Egg_breakfast_sandwich.jpg/1280px-Egg_breakfast_sandwich.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+                Rating = 4.2,
+                SellerId = food.Id,
+                SellerName = "Food Store",
+                Category = "Food",
+                Stock = 10,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Chess Set",
+                Price = 60.00M,
+                Description = "Electronic Chess Set",
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/7/7b/RS_Chess_Computer.JPG?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+                Rating = 4.8,
+                SellerId = game.Id,
+                SellerName = "Game Store",
+                Category = "Games",
+                Stock = 10,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Lipstick",
+                Price = 20.00M,
+                Description = "Pink Lipstick",
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Lapiz_labial.jpg/960px-Lapiz_labial.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+                Rating = 4.8,
+                SellerId = beauty.Id,
+                SellerName = "Beauty Store",
+                Category = "Beauty",
+                Stock = 70,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Model T",
+                Price = 1000.00M,
+                Description = "Black Model T",
+                ImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/1925_Ford_Model_T_touring.jpg/1280px-1925_Ford_Model_T_touring.jpg?utm_source=en.wikipedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+                Rating = 4.4,
+                SellerId = auto.Id,
+                SellerName = "Auto Store",
+                Category = "Automotive",
+                Stock = 5,
+                IsActive = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Flowerpot",
+                Price = 20.00M,
+                Description = "Flowerpot for Home Garnening",
+                ImageUrl = "https://images.unsplash.com/photo-1730818705543-db44a62fd4f7?q=80&w=765&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                Rating = 4.4,
+                SellerId = HG.Id,
+                SellerName = "Home & Garden Store",
+                Category = "Home & Garden",
+                Stock = 5,
                 IsActive = true,
                 CreatedAt = DateTime.Now
             }
