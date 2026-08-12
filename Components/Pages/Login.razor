@@ -233,12 +233,12 @@
 
         if (user != null)
         {
-            AuthStateService.SetUser(user);
+            await AuthStateService.SetUserAsync(user, loginModel.RememberMe);
             successMessage = $"Welcome back, {user.FirstName}!";
             await Task.Delay(500);
             if (NavigationManager != null)
             {
-                NavigationManager.NavigateTo("/", true);
+                NavigationManager.NavigateTo("/");
             }
         }
         else

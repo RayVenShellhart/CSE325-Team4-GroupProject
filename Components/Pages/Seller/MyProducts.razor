@@ -5,6 +5,8 @@
 @inject AuthStateService AuthStateService
 @inject NavigationManager Navigation
 
+@implements IDisposable
+
 <PageTitle>ShopHub - My Products</PageTitle>
 
 @if (!IsSeller)
@@ -163,42 +165,82 @@ else
     .alert-warning { background: #fff3cd; color: #856404; padding: 24px; border-radius: 10px; }
 </style>
 
+
+
 @code {
     private List<Product> products = new();
     private bool isLoading = true;
+    private bool isAuthLoaded = false;
     private string statusMessage = "";
     private bool isError;
 
+    // Determines wether the signed in user can manage products "Sellers and admin"
     private bool IsSeller =>
         AuthStateService.CurrentUser != null &&
         (AuthStateService.CurrentUser.UserType is "Seller" or "Both" or "Admin");
 
+
+    //Keeps login state so that a users session is restored
+    protected override void OnInitialized()
+    {
+        AuthStateService.OnChange += AuthStateChanged;
+    }
+
+    //Loads the sellers products using seller id
     protected override async Task OnInitializedAsync()
     {
-        if (!IsSeller)
+        if (AuthStateService.CurrentUser != null)
         {
+
+
+
+            isAuthLoaded = true;
+
+            if (IsSeller)
+            {
+                await LoadProducts();
+            }
+
             isLoading = false;
+        }
+    }
+
+    //Handles Auth changes
+    private async void AuthStateChanged() {
+        await InvokeAsync(async () =>
+        {
+            isAuthLoaded = true;
+
+            if (IsSeller)
+            {
+                await LoadProducts();
+            }
+
+            isLoading = false;
+            StateHasChanged();
+        });
+    }
+
+
+
+    public void Dispose() {
+        AuthStateService.OnChange -= AuthStateChanged;
+    }
+
+    //REtrives products belonging to user seller
+    private async Task LoadProducts()
+    {
+        var user = AuthStateService.CurrentUser;
+
+        if (user == null) {
+            products = new();
             return;
         }
 
-        await LoadProducts();
+        products = await ProductService.GetProductsBySellerAsync(user.Id);
     }
 
-    private async Task LoadProducts()
-    {
-        isLoading = true;
-        var user = AuthStateService.CurrentUser!;
-        if (user.UserType == "Admin")
-        {
-            products = await ProductService.GetAllProductsIncludingInactiveAsync();
-        }
-        else
-        {
-            products = await ProductService.GetProductsBySellerAsync(user.Id);
-        }
-        isLoading = false;
-    }
-
+    //Activates and deactivates products
     private async Task ToggleActive(Product p)
     {
         var user = AuthStateService.CurrentUser!;
@@ -217,6 +259,7 @@ else
         }
     }
 
+    //deletes products
     private async Task ConfirmDelete(Product p)
     {
         var user = AuthStateService.CurrentUser!;
