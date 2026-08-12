@@ -44,7 +44,7 @@ public class ProductServiceTests
         await service.SeedProductsAsync();
 
         var products = await service.GetAllProductsAsync();
-        Assert.Equal(8, products.Count);
+        Assert.Equal(14, products.Count);
     }
 
     [Fact]
